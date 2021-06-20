@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProgressRepository extends CrudRepository<Progress, Long> {
+public interface ProgressRepository extends CrudRepository<Progress, String> {
 
     List<Progress> findAll();
 

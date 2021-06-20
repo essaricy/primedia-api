@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 
 @Component
 @Slf4j
@@ -36,7 +35,7 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
             MediaContentProcessor mediaContentProcessor = mediaContentProcessorFactory.getInstance(type);
             mediaContentProcessor.process(mediaId, trackingId, uploadedFile);
             log.info("Media content has been saved successfully for trackingId={}", trackingId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error occurred while processing media content. trackingId={}", trackingId);
         }
     }

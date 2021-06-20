@@ -14,15 +14,11 @@ public class MediaRequest {
 
     private String name;
 
-    private Type type;
-
     private Rating rating;
 
     private Quality quality;
 
     private Set<String> tags;
-
-    private long size;
 
     private boolean addView;
 

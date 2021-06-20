@@ -17,17 +17,23 @@ public enum Type {
     private String code;
 
     @Getter
-    private String description;
+    private String value;
 
-    Type(String code, String description) {
+    Type(String code, String value) {
         this.code = code;
-        this.description = description;
+        this.value = value;
     }
 
     @JsonCreator
     public static Type fromCode(String code) {
         return Arrays.stream(values())
                 .filter(m -> StringUtils.equalsIgnoreCase(m.getCode(), code))
+                .findAny().orElse(null);
+    }
+
+    public static Type fromValue(String value) {
+        return Arrays.stream(values())
+                .filter(m -> StringUtils.equalsIgnoreCase(m.getValue(), value))
                 .findAny().orElse(null);
     }
 

@@ -80,19 +80,22 @@ public class MediaService {
 
     public byte[] getThumbnail(Type type, long id) {
         MediaContent mediaContent = getMediaContent(type, id);
-        return mediaContent == null ? null : mediaContent.getThumbnail();
+        //return mediaContent == null ? null : mediaContent.getThumbnail();
+        return null;
     }
 
     public byte[] getContent(Type type, long id) {
         MediaContent mediaContent = getMediaContent(type, id);
-        return mediaContent == null ? null : mediaContent.getContent();
+        //return mediaContent == null ? null : mediaContent.getContent();
+        return null;
     }
 
+    // Mark @Transactional
     public ProgressDto upload(Type type, MediaRequest request, MultipartFile multipartFile)
             throws MediaException {
         try {
             String name = request.getName();
-            long size = request.getSize();
+            long size = multipartFile.getSize();
             log.info("upload requested, type={}, name={}, size={}", type, name, size);
             if (type == null) {
                 throw new MediaException("Invalid media type");
