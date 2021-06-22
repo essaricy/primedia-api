@@ -4,7 +4,9 @@ import com.sednar.digital.media.repo.ImageRepository;
 import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.entity.Image;
 import com.sednar.digital.media.repo.entity.MediaContent;
+import com.sednar.digital.media.service.config.properties.ImageContentProcessingProps;
 import com.sednar.digital.media.service.content.MediaContentProcessor;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,16 +19,25 @@ public class ImageContentProcessor extends MediaContentProcessor {
 
     private final ImageRepository imageRepository;
 
+    private final ImageContentProcessingProps properties;
+
     @Autowired
     ImageContentProcessor(ProgressRepository progressRepository,
-                          ImageRepository imageRepository) {
+                          ImageRepository imageRepository,
+                          ImageContentProcessingProps properties) {
         super(progressRepository);
         this.imageRepository = imageRepository;
+        this.properties = properties;
     }
 
     @Override
     public File generateThumbnail(File file) throws IOException {
-        return null;
+        File thumbnail = new File(file.getParent(), file.getName() + properties.getSuffix());
+        Thumbnails.of(file)
+                .width(properties.getWidth())
+                .height(properties.getHeight())
+                .toFile(thumbnail);
+        return thumbnail;
     }
 
     @Override

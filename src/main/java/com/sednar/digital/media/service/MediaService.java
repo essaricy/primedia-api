@@ -1,23 +1,18 @@
 package com.sednar.digital.media.service;
 
 import com.sednar.digital.media.common.constants.MediaConstants;
-import com.sednar.digital.media.common.type.ProgressStatus;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
 import com.sednar.digital.media.exception.MediaException;
-import com.sednar.digital.media.repo.ImageRepository;
 import com.sednar.digital.media.repo.MediaRepository;
-import com.sednar.digital.media.repo.ProgressRepository;
-import com.sednar.digital.media.repo.VideoRepository;
 import com.sednar.digital.media.repo.entity.Media;
-import com.sednar.digital.media.repo.entity.MediaContent;
-import com.sednar.digital.media.repo.entity.Progress;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
 import com.sednar.digital.media.resource.v1.model.MediaRequest;
 import com.sednar.digital.media.resource.v1.model.ProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.events.UploadEvent;
+import com.sednar.digital.media.service.progress.ProgressService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,24 +33,17 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
 
-    private final ImageRepository imageRepository;
+    private final ProgressService progressService;
 
-    private final VideoRepository videoRepository;
-
-    private final ProgressRepository progressRepository;
-
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public MediaService(MediaRepository mediaRepository,
-                        ImageRepository imageRepository,
-                        VideoRepository videoRepository,
-                        ProgressRepository progressRepository) {
+                        ProgressService progressService,
+                        ApplicationEventPublisher applicationEventPublisher) {
         this.mediaRepository = mediaRepository;
-        this.imageRepository = imageRepository;
-        this.videoRepository = videoRepository;
-        this.progressRepository = progressRepository;
+        this.progressService = progressService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public List<MediaDto> search(String searchText) {
@@ -71,23 +58,10 @@ public class MediaService {
             mediaList = mediaRepository.findByType(type.getCode());
         }
         List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
-        List<MediaDto> searchResult = list.stream()
+        return list.stream()
                 .filter(m -> m.getTags().stream().anyMatch(searchText::equalsIgnoreCase)
                     || StringUtils.containsIgnoreCase(m.getName(), searchText))
                 .collect(Collectors.toList());
-        return searchResult;
-    }
-
-    public byte[] getThumbnail(Type type, long id) {
-        MediaContent mediaContent = getMediaContent(type, id);
-        //return mediaContent == null ? null : mediaContent.getThumbnail();
-        return null;
-    }
-
-    public byte[] getContent(Type type, long id) {
-        MediaContent mediaContent = getMediaContent(type, id);
-        //return mediaContent == null ? null : mediaContent.getContent();
-        return null;
     }
 
     // Mark @Transactional
@@ -103,12 +77,11 @@ public class MediaService {
             if (StringUtils.isBlank(name)) {
                 throw new MediaException("Name is required");
             }
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             Media media = new Media();
             media.setType(type.getCode());
             media.setName(name);
             media.setSize(size);
-            media.setUploadDate(timestamp);
+            media.setUploadDate(new Timestamp(System.currentTimeMillis()));
 
             Rating rating = request.getRating();
             if (rating != null) {
@@ -123,19 +96,13 @@ public class MediaService {
                 media.setTags(String.join(MediaConstants.TAG_SEPARATOR, tags));
             }
             Media savedMedia = mediaRepository.save(media);
-            Progress progress = new Progress();
+
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
-            progress.setId(trackingId);
-            progress.setMediaId(savedMedia.getId());
-            progress.setStartTime(timestamp);
-            progress.setStatus(ProgressStatus.REQUESTED.getCode());
-            Progress savedProgress = progressRepository.save(progress);
-
-            ProgressDto progressDto = MapperConstant.PROGRESS.map(savedProgress);
+            ProgressDto savedProgress = progressService.save(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
                     new UploadEvent(this, type, savedMedia.getId(), trackingId, multipartFile));
-            return progressDto;
+            return savedProgress;
         } catch(Exception e) {
             throw new MediaException("Unable to store " + type.toString() + ". ERROR=" + e.getMessage());
         }
@@ -168,16 +135,6 @@ public class MediaService {
         }
         Media savedMedia = mediaRepository.save(media);
         return MapperConstant.MEDIA.map(savedMedia);
-    }
-
-    private MediaContent getMediaContent(Type type, long id) {
-        Optional<? extends MediaContent> optionalMediaContent = null;
-        if (type == Type.IMAGE) {
-            optionalMediaContent = imageRepository.findById(id);
-        } else if (type == Type.VIDEO) {
-            optionalMediaContent = videoRepository.findById(id);
-        }
-        return optionalMediaContent.orElseThrow(() -> new MediaException("Invalid Media ID"));
     }
 
 }

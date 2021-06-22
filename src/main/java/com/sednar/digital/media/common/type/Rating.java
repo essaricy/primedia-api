@@ -1,33 +1,34 @@
 package com.sednar.digital.media.common.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.util.Arrays;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Rating {
 
-    POOR(1, "Poor"),
-    NOT_BAD(2, "Not Bad"),
-    OK(3, "Ok"),
-    GOOD(4, "Good"),
-    EXCELLENT(5, "Excellent");
+    POOR(1),
+    NOT_BAD(2),
+    OK(3),
+    GOOD(4),
+    EXCELLENT(5);
 
     @Getter
     private int code;
 
-    @Getter
-    private String description;
-
-    Rating(int code, String description) {
+    Rating(int code) {
         this.code = code;
     }
 
     @JsonCreator
     public static Rating fromCode(int code) {
         return Arrays.stream(values()).filter(m -> m.getCode() == code).findAny().orElse(null);
+    }
+
+    @JsonValue
+    public int toCode() {
+        return getCode();
     }
 
 }

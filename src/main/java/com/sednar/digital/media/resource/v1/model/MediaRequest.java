@@ -2,7 +2,6 @@ package com.sednar.digital.media.resource.v1.model;
 
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
-import com.sednar.digital.media.common.type.Type;
 import lombok.Getter;
 import lombok.Setter;
 

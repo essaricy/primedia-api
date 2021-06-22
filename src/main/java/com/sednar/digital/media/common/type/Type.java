@@ -1,27 +1,22 @@
 package com.sednar.digital.media.common.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Type {
 
-    IMAGE("I", "Image"),
-    VIDEO("V", "Video");
+    IMAGE("I"),
+    VIDEO("V");
 
     @Getter
     private String code;
 
-    @Getter
-    private String value;
-
-    Type(String code, String value) {
+    Type(String code) {
         this.code = code;
-        this.value = value;
     }
 
     @JsonCreator
@@ -31,10 +26,9 @@ public enum Type {
                 .findAny().orElse(null);
     }
 
-    public static Type fromValue(String value) {
-        return Arrays.stream(values())
-                .filter(m -> StringUtils.equalsIgnoreCase(m.getValue(), value))
-                .findAny().orElse(null);
+    @JsonValue
+    public String toCode() {
+        return getCode();
     }
 
 }

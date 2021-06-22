@@ -17,7 +17,7 @@ public class MediaDto {
 
     private Type type;
 
-    private String quality;
+    private int quality;
 
     private long size;
 

@@ -1,6 +1,7 @@
 package com.sednar.digital.media.resource.v1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sednar.digital.media.common.constants.MediaConstants;
 import com.sednar.digital.media.common.type.Type;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
 import com.sednar.digital.media.resource.v1.model.MediaRequest;
@@ -10,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,8 +23,6 @@ import java.util.List;
 @Api(tags = "Media", value = "APIs related to all types of Media")
 public class MediaResource {
 
-    public static final String TYPES = "Image,Video";
-
     private final MediaService service;
 
     @Autowired
@@ -35,34 +33,16 @@ public class MediaResource {
     @GetMapping("/{type}")
     @ApiOperation(value = "Search images by text")
     public List<MediaDto> search(
-            @ApiParam(defaultValue = "Video", allowableValues = TYPES)
+            @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
             @RequestParam(name="s") String searchText) {
         return service.search(type, searchText);
     }
 
-    @GetMapping(path = "/{type}/{id}/thumb",
-            produces={ MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE })
-    public byte[] getThumbnail(
-            @ApiParam(defaultValue = "Video", allowableValues = TYPES)
-            @PathVariable @NotNull(message="Invalid Media Type") Type type,
-            @PathVariable long id) {
-        return service.getThumbnail(type, id);
-    }
-
-    @GetMapping(path = "/{type}/{id}/content",
-            produces={ MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE })
-    public byte[] getContent(
-            @ApiParam(defaultValue = "Video", allowableValues = TYPES)
-            @PathVariable @NotNull(message="Invalid Media Type") Type type,
-            @PathVariable long id) {
-        return service.getContent(type, id);
-    }
-
     @PostMapping("/{type}")
     @ApiOperation(value = "Upload any media type")
     public ProgressDto upload(
-            @ApiParam(defaultValue = "Video", allowableValues = TYPES)
+            @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
             @RequestParam("request") String request,
             @RequestParam("file") MultipartFile file) throws IOException {
@@ -74,7 +54,7 @@ public class MediaResource {
     @ApiOperation(value = "Update media attributes")
     public MediaDto update(
             @PathVariable(name="id") long id,
-            @RequestParam("request") MediaRequest mediaRequest) {
+            @RequestBody MediaRequest mediaRequest) {
         return service.update(id, mediaRequest);
     }
 

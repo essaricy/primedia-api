@@ -7,7 +7,7 @@ public class StringToTypeConverter implements Converter<String, Type> {
 
     @Override
     public Type convert(String value) {
-        return Type.fromValue(value);
+        return Type.fromCode(value);
     }
 
 }

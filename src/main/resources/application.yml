@@ -32,3 +32,8 @@ app:
       suffix: _thumb.gif
       grabAtPercent: 40
       gifDuration: 10
+  image:
+    thumbnail:
+      width: 600
+      height: 600
+      suffix: _thumb.jpg

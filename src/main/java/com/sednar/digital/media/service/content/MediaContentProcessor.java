@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
+import java.sql.Timestamp;
 
 @Slf4j
 public abstract class MediaContentProcessor {
@@ -39,6 +40,7 @@ public abstract class MediaContentProcessor {
         }
         try {
             saveContent(mediaId, uploadedFile, thumb);
+            progress.setEndTime(new Timestamp(System.currentTimeMillis()));
             setProcessStatus(progress, ProgressStatus.SAVE_DONE);
         } catch (Exception e) {
             setProcessStatus(progress, ProgressStatus.SAVE_FAIL);

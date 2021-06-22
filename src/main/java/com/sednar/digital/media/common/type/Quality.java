@@ -1,28 +1,23 @@
 package com.sednar.digital.media.common.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.util.Arrays;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Quality {
 
-    LOW(1, "Low"),
-    MEDIUM(2, "Medium"),
-    HIGH(3, "High"),
-    HD(4, "High Definition");
+    LOW(1),
+    MEDIUM(2),
+    HIGH(3),
+    HD(4);
 
     @Getter
     private int code;
 
-    @Getter
-    private String description;
-
-    Quality(int code, String description) {
+    Quality(int code) {
         this.code = code;
-        this.description = description;
     }
 
     @JsonCreator
@@ -30,5 +25,9 @@ public enum Quality {
         return Arrays.stream(values()).filter(m -> m.getCode() == code).findAny().orElse(null);
     }
 
+    @JsonValue
+    public int toCode() {
+        return getCode();
+    }
 
 }
