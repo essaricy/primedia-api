@@ -1,6 +1,7 @@
 package com.sednar.digital.media.service;
 
 import com.sednar.digital.media.common.constants.MediaConstants;
+import com.sednar.digital.media.common.file.FileSystem;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -99,12 +101,14 @@ public class MediaService {
 
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
+            File uploadedFile = FileSystem.save(trackingId, multipartFile.getBytes());
+            log.info("Saved to local disk, trackingId={}", trackingId);
             ProgressDto savedProgress = progressService.save(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
-                    new UploadEvent(this, type, savedMedia.getId(), trackingId, multipartFile));
+                    new UploadEvent(this, type, savedMedia.getId(), trackingId));
             return savedProgress;
         } catch(Exception e) {
-            throw new MediaException("Unable to store " + type.toString() + ". ERROR=" + e.getMessage());
+            throw new MediaException("Unable to store " + type + ". ERROR=" + e.getMessage());
         }
     }
 

@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 
@@ -27,16 +26,15 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         Type type = uploadEvent.getType();
         Long mediaId = uploadEvent.getMediaId();
         String trackingId = uploadEvent.getTrackingId();
-        MultipartFile multipartFile = uploadEvent.getMultipartFile();
         log.info("Received Event, trackingId={}", trackingId);
         try {
-            File uploadedFile = FileSystem.save(trackingId, multipartFile.getBytes());
+            File uploadedFile = FileSystem.get(trackingId);
             log.info("Saved to local disk, trackingId={}", trackingId);
             MediaContentProcessor mediaContentProcessor = mediaContentProcessorFactory.getInstance(type);
             mediaContentProcessor.process(mediaId, trackingId, uploadedFile);
             log.info("Media content has been saved successfully for trackingId={}", trackingId);
         } catch (Exception e) {
-            log.error("Error occurred while processing media content. trackingId={}", trackingId);
+            log.error("Error occurred while processing media content. trackingId={}", trackingId, e);
         }
     }
 

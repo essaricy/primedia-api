@@ -11,4 +11,6 @@ public interface ProgressRepository extends CrudRepository<Progress, String> {
 
     List<Progress> findAll();
 
+    List<Progress> findByOrderByStartTimeDesc();
+
 }

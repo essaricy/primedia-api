@@ -25,4 +25,9 @@ public class FileSystem {
         log.info("File {} has been saved to {} ", fileName, localFile.getAbsolutePath());
         return localFile;
     }
+
+    public static File get(String fileName) {
+        return new File(APP_DIR, fileName);
+    }
+
 }

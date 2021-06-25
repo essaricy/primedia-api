@@ -19,6 +19,8 @@ public class MediaRequest {
 
     private Set<String> tags;
 
+    private long size;
+
     private boolean addView;
 
     private boolean addLike;

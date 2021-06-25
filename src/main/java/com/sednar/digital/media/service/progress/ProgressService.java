@@ -27,7 +27,7 @@ public class ProgressService {
     }
 
     public List<ProgressDto> getAll() {
-        List<Progress> progresses = progressRepository.findAll();
+        List<Progress> progresses = progressRepository.findByOrderByStartTimeDesc();
         Collections.sort(progresses, Comparator.comparing(Progress::getStartTime));
         return MapperConstant.PROGRESS.map(progresses);
     }
