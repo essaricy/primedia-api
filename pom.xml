@@ -10,10 +10,10 @@
 	</parent>
 
 	<groupId>com.sednar.digital</groupId>
-	<artifactId>media-api</artifactId>
+	<artifactId>primedia-api</artifactId>
 	<version>1.0</version>
-	<name>Media API</name>
-	<description>Media API</description>
+	<name>Primedia API</name>
+	<description>Primedia API</description>
 
 	<properties>
 		<java.version>1.8</java.version>
