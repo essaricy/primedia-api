@@ -55,9 +55,9 @@ public class MediaService {
     public List<MediaDto> search(Type type, String searchText) {
         List<Media> mediaList;
         if (type == null) {
-            mediaList = mediaRepository.findAll();
+            mediaList = mediaRepository.findAllByOrderByViewsDescLikesDesc();
         } else {
-            mediaList = mediaRepository.findByType(type.getCode());
+            mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
         }
         List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
         return list.stream()

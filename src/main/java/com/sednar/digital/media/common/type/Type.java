@@ -26,6 +26,12 @@ public enum Type {
                 .findAny().orElse(null);
     }
 
+    public static Type fromValue(String value) {
+        return Arrays.stream(values())
+                .filter(m -> StringUtils.equalsIgnoreCase(m.toString(), value))
+                .findAny().orElse(null);
+    }
+
     @JsonValue
     public String toCode() {
         return getCode();

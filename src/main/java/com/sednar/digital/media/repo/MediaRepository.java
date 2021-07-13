@@ -11,7 +11,11 @@ public interface MediaRepository extends CrudRepository<Media, Long> {
 
     List<Media> findAll();
 
+    List<Media> findAllByOrderByViewsDescLikesDesc();
+
     List<Media> findByType(String type);
+
+    List<Media> findByTypeOrderByViewsDescLikesDesc(String type);
 
     List<Media> findByRating(int rating);
 
