@@ -58,4 +58,28 @@ public class MediaResource {
         return service.update(id, mediaRequest);
     }
 
+    @GetMapping("/most/recent")
+    @ApiOperation(value = "Get most recent media")
+    public List<MediaDto> getMostRecent() {
+        return service.getMostRecent();
+    }
+
+    @GetMapping("/most/viewed")
+    @ApiOperation(value = "Get most viewed media")
+    public List<MediaDto> getMostViewed() {
+        return service.getMostViewed();
+    }
+
+    @GetMapping("/most/liked")
+    @ApiOperation(value = "Get most liked media")
+    public List<MediaDto> getMostLiked() {
+        return service.getMostLiked();
+    }
+
+    @GetMapping("/most/rated")
+    @ApiOperation(value = "Get most rated media")
+    public List<MediaDto> getMostRated() {
+        return service.getMostRated();
+    }
+
 }

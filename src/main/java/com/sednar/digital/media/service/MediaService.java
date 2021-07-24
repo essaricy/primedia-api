@@ -141,4 +141,20 @@ public class MediaService {
         return MapperConstant.MEDIA.map(savedMedia);
     }
 
+    public List<MediaDto> getMostRecent() {
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByUploadDateDesc());
+    }
+
+    public List<MediaDto> getMostViewed() {
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByViewsAsc());
+    }
+
+    public List<MediaDto> getMostLiked() {
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByLikesAsc());
+    }
+
+    public List<MediaDto> getMostRated() {
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByRatingDesc());
+    }
+
 }

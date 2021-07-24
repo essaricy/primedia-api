@@ -2,14 +2,12 @@ package com.sednar.digital.media.service.content.video;
 
 import com.sednar.digital.media.common.util.ProcessUtil;
 import com.sednar.digital.media.service.config.properties.VideoContentProcessingProps;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.List;
 
 @Service
 public class FFmpegVideoService {
@@ -46,15 +44,11 @@ public class FFmpegVideoService {
                 properties.getProcessorPath().getAbsolutePath(),
                 properties.getInfoProvider(),
                 video.getAbsolutePath());
-        List<String> output = ProcessUtil.execute(command);
-        if (CollectionUtils.isEmpty(output)) {
+        String output = ProcessUtil.execute(command);
+        if (StringUtils.isEmpty(output)) {
             return 0;
         }
-        String line1 = output.get(0);
-        if (StringUtils.isEmpty(line1)) {
-            return 0;
-        }
-        return (int) Double.parseDouble(line1);
+        return (int) Double.parseDouble(output);
     }
 
 }
