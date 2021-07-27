@@ -7,7 +7,10 @@ import com.sednar.digital.media.service.ContentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -26,11 +29,17 @@ public class ContentResource {
 
     @GetMapping(path = "/{type}/{id}",
             produces={ MediaType.IMAGE_JPEG_VALUE, "video/mp4" })
-    public byte[] getContent(
+    public ResponseEntity<byte[]> getContent(
             @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
             @PathVariable long id) {
-        return service.getContent(type, id);
+        byte[] content = service.getContent(type, id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", type == Type.IMAGE
+                ? MediaType.IMAGE_JPEG_VALUE
+                : "video/mp4");
+        headers.add("Content-Length", Long.toString(content.length));
+        return new ResponseEntity<>(content, headers, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{type}/{id}/thumb",

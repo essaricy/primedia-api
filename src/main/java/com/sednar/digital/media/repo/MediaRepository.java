@@ -17,10 +17,18 @@ public interface MediaRepository extends CrudRepository<Media, Long> {
 
     List<Media> findTop5ByOrderByUploadDateDesc();
 
-    List<Media> findTop5ByOrderByViewsAsc();
+    List<Media> findTop5ByOrderByViewsDesc();
 
-    List<Media> findTop5ByOrderByLikesAsc();
+    List<Media> findTop5ByOrderByLikesDesc();
 
     List<Media> findTop5ByOrderByRatingDesc();
+
+    List<Media> findAllByOrderByUploadDateDesc();
+
+    List<Media> findAllByOrderByViewsDesc();
+
+    List<Media> findAllByOrderByLikesDesc();
+
+    List<Media> findAllByOrderByRatingDesc();
 
 }

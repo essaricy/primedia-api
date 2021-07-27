@@ -141,16 +141,32 @@ public class MediaService {
         return MapperConstant.MEDIA.map(savedMedia);
     }
 
+    public List<MediaDto> getAllRecent() {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByUploadDateDesc());
+    }
+
     public List<MediaDto> getMostRecent() {
         return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByUploadDateDesc());
     }
 
+    public List<MediaDto> getAllViewed() {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByViewsDesc());
+    }
+
     public List<MediaDto> getMostViewed() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByViewsAsc());
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByViewsDesc());
+    }
+
+    public List<MediaDto> getAllLiked() {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByLikesDesc());
     }
 
     public List<MediaDto> getMostLiked() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByLikesAsc());
+        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByLikesDesc());
+    }
+
+    public List<MediaDto> getAllRated() {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByRatingDesc());
     }
 
     public List<MediaDto> getMostRated() {
