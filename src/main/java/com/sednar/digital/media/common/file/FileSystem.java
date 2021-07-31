@@ -30,4 +30,13 @@ public class FileSystem {
         return new File(APP_DIR, fileName);
     }
 
+    public static File saveAndMark(String fileName, byte[] bytes) throws IOException {
+        File contentFile = new File(APP_DIR, fileName);
+        File markFile = new File(APP_DIR, fileName + ".done");
+        FileUtils.writeByteArrayToFile(contentFile, bytes);
+        markFile.createNewFile();
+        log.info("File {} has been saved to {} ", fileName, contentFile.getAbsolutePath());
+        return contentFile;
+    }
+
 }

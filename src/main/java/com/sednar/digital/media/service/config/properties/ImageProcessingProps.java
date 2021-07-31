@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("app.image.thumbnail")
 @Getter
 @Setter
-public class ImageContentProcessingProps {
+public class ImageProcessingProps {
 
     private int width;
 

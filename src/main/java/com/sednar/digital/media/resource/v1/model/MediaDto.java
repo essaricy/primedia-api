@@ -33,4 +33,6 @@ public class MediaDto {
 
     private Timestamp lastSeen;
 
+    private String duration;
+
 }

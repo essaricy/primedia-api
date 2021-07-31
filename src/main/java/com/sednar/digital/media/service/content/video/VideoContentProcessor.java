@@ -1,12 +1,11 @@
 package com.sednar.digital.media.service.content.video;
 
-import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.VideoRepository;
 import com.sednar.digital.media.repo.entity.MediaContent;
 import com.sednar.digital.media.repo.entity.Video;
-import com.sednar.digital.media.service.config.properties.VideoContentProcessingProps;
-import com.sednar.digital.media.service.content.MediaContentProcessor;
+import com.sednar.digital.media.service.config.properties.VideoProcessingProps;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +13,9 @@ import java.io.File;
 import java.io.IOException;
 
 @Component
-public class VideoContentProcessor extends MediaContentProcessor {
+public class VideoContentProcessor {
 
-    private final VideoContentProcessingProps properties;
+    private final VideoProcessingProps properties;
 
     private final VideoRepository videoRepository;
 
@@ -24,20 +23,21 @@ public class VideoContentProcessor extends MediaContentProcessor {
     private FFmpegVideoService fFmpegVideoService;
 
     @Autowired
-    VideoContentProcessor(ProgressRepository progressRepository,
-                          VideoContentProcessingProps properties,
+    VideoContentProcessor(VideoProcessingProps properties,
                           VideoRepository videoRepository) {
-        super(progressRepository);
         this.properties = properties;
         this.videoRepository = videoRepository;
     }
 
-    @Override
-    public File generateThumbnail(File file) throws Exception {
-        return fFmpegVideoService.generateThumbnail(file);
+    public double getVideoLength(File file) {
+        String videoLength = fFmpegVideoService.getVideoLength(file);
+        return StringUtils.isBlank(videoLength) ? 0 : Double.parseDouble(videoLength);
     }
 
-    @Override
+    public File generateThumbnail(File file, double length) {
+        return fFmpegVideoService.generateThumbnail(file, length);
+    }
+
     public MediaContent saveContent(Long mediaId, File content, File thumb) throws IOException {
         Video video = new Video();
         video.setId(mediaId);

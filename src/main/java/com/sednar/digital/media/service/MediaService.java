@@ -22,7 +22,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -66,7 +65,6 @@ public class MediaService {
                 .collect(Collectors.toList());
     }
 
-    // Mark @Transactional
     public ProgressDto upload(Type type, MediaRequest request, MultipartFile multipartFile)
             throws MediaException {
         try {
@@ -98,10 +96,9 @@ public class MediaService {
                 media.setTags(String.join(MediaConstants.TAG_SEPARATOR, tags));
             }
             Media savedMedia = mediaRepository.save(media);
-
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
-            File uploadedFile = FileSystem.save(trackingId, multipartFile.getBytes());
+            FileSystem.save(trackingId, multipartFile.getBytes());
             log.info("Saved to local disk, trackingId={}", trackingId);
             ProgressDto savedProgress = progressService.save(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(

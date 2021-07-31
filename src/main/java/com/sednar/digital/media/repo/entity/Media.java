@@ -36,4 +36,6 @@ public class Media {
 
     private Timestamp lastSeen;
 
+    private String duration;
+
 }

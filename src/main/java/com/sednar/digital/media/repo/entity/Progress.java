@@ -23,4 +23,6 @@ public class Progress {
 
     private Timestamp endTime;
 
+    private String errorMessage;
+
 }

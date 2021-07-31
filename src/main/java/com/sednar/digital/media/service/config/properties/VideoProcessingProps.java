@@ -11,7 +11,7 @@ import java.io.File;
 @ConfigurationProperties("app.video.thumbnail")
 @Getter
 @Setter
-public class VideoContentProcessingProps {
+public class VideoProcessingProps {
 
     private File processorPath;
 
