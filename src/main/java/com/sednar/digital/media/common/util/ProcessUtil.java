@@ -20,7 +20,7 @@ public class ProcessUtil {
         log.info("Executing command: {}", command);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
-            Process process = processBuilder.start();
+            Process process = processBuilder.redirectErrorStream(true).start();
             String result = new BufferedReader(new InputStreamReader(process.getInputStream()))
                     .lines().collect(Collectors.joining());
             process.waitFor();
@@ -34,7 +34,6 @@ public class ProcessUtil {
             Duration duration = Duration.ofMillis(endTime - startTime);
             log.info("Total time take for command: {} is {}", command, duration);
             return result;
-            //return IOUtils.readLines(process.getInputStream());
         } catch (Exception e) {
             throw new MediaException("Unable to execute command. Error: " + e.getMessage()
                     + ". Command: " + command);

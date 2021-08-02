@@ -7,12 +7,14 @@ import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.repo.entity.Progress;
+import com.sednar.digital.media.resource.v1.model.ProgressDto;
+import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.content.image.ImageContentProcessor;
 import com.sednar.digital.media.service.content.video.VideoContentProcessor;
 import com.sednar.digital.media.service.events.UploadEvent;
+import com.sednar.digital.media.util.DurationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -81,11 +83,9 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         try {
             if (type == Type.VIDEO) {
                 videoContentProcessor.saveContent(mediaId, uploadedFile, thumb);
-                int millis = (int) videoLength * 1000;
-                String duration = DurationFormatUtils.formatDuration(millis, "HH:mm:ss");
                 Media media = mediaRepository.findById(mediaId)
                         .orElseThrow(() -> new ValidationException("Invalid media id"));
-                media.setDuration(duration);
+                media.setDuration(DurationUtil.getDurationStamp(videoLength));
                 mediaRepository.save(media);
             } else if (type == Type.IMAGE) {
                 imageContentProcessor.saveContent(mediaId, uploadedFile, thumb);
@@ -108,7 +108,8 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
     private void setProcessStatus(Progress progress, ProgressStatus status, String errorMessage) {
         progress.setStatus(status.getCode());
         progress.setErrorMessage(errorMessage);
-        progressRepository.save(progress);
+        Progress savedProgress = progressRepository.save(progress);
+        ProgressDto progressDto = MapperConstant.PROGRESS.map(savedProgress);
         log.info("Updated process status of trackingId={} to {}", progress.getId(), status);
     }
 

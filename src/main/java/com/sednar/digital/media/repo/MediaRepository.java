@@ -31,4 +31,6 @@ public interface MediaRepository extends CrudRepository<Media, Long> {
 
     List<Media> findAllByOrderByRatingDesc();
 
+    List<Media> findByType(String code);
+
 }
