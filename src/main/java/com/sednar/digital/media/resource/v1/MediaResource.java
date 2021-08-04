@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
@@ -58,52 +60,44 @@ public class MediaResource {
         return service.update(id, mediaRequest);
     }
 
-    @GetMapping("/recent/all")
-    @ApiOperation(value = "Get all recent media")
-    public List<MediaDto> getAllRecent() {
-        return service.getAllRecent();
-    }
-
-    @GetMapping("/recent/most")
+    @GetMapping("/{type}/recent")
     @ApiOperation(value = "Get most recent media")
-    public List<MediaDto> getMostRecent() {
-        return service.getMostRecent();
+    public List<MediaDto> getMostRecent(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type,
+            @RequestParam(name = "max", required = false) @Valid
+            @Min(value=3, message = "Minimum value cannot be lesser than {value}") Integer max) {
+        return service.getMostRecent(type, max);
     }
 
-    @GetMapping("/viewed/all")
-    @ApiOperation(value = "Get all viewed media")
-    public List<MediaDto> getAllViewed() {
-        return service.getAllViewed();
-    }
-
-    @GetMapping("/viewed/most")
+    @GetMapping("/{type}/viewed")
     @ApiOperation(value = "Get most viewed media")
-    public List<MediaDto> getMostViewed() {
-        return service.getMostViewed();
+    public List<MediaDto> getMostViewed(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type,
+            @RequestParam(name = "max", required = false) @Valid
+            @Min(value=3, message = "Minimum value cannot be lesser than {value}") Integer max) {
+        return service.getMostViewed(type, max);
     }
 
-    @GetMapping("/liked/all")
-    @ApiOperation(value = "Get all liked media")
-    public List<MediaDto> getAllLiked() {
-        return service.getAllLiked();
-    }
-
-    @GetMapping("/liked/most")
+    @GetMapping("/{type}/liked")
     @ApiOperation(value = "Get most liked media")
-    public List<MediaDto> getMostLiked() {
-        return service.getMostLiked();
+    public List<MediaDto> getMostLiked(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type,
+            @RequestParam(name = "max", required = false) @Valid
+            @Min(value=3, message = "Minimum value cannot be lesser than {value}") Integer max) {
+        return service.getMostLiked(type, max);
     }
 
-    @GetMapping("/rated/all")
-    @ApiOperation(value = "Get all rated media")
-    public List<MediaDto> getAllRated() {
-        return service.getAllRated();
-    }
-
-    @GetMapping("/rated/most")
+    @GetMapping("/{type}/rated")
     @ApiOperation(value = "Get most rated media")
-    public List<MediaDto> getMostRated() {
-        return service.getMostRated();
+    public List<MediaDto> getMostRated(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type,
+            @RequestParam(name = "max", required = false) @Valid
+            @Min(value=3, message = "Minimum value cannot be lesser than {value}") Integer max) {
+        return service.getMostRated(type, max);
     }
 
 }

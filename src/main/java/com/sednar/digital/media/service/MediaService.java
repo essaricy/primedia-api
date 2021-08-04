@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MediaService {
 
+    public static final int DEFAULT_MAX_RESULTS = 3;
+
     private final MediaRepository mediaRepository;
 
     private final ProgressService progressService;
@@ -47,17 +49,8 @@ public class MediaService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public List<MediaDto> search(String searchText) {
-        return search(null, searchText);
-    }
-
     public List<MediaDto> search(Type type, String searchText) {
-        List<Media> mediaList;
-        if (type == null) {
-            mediaList = mediaRepository.findAllByOrderByViewsDescLikesDesc();
-        } else {
-            mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
-        }
+        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
         List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
         return list.stream()
                 .filter(m -> m.getTags().stream().anyMatch(searchText::equalsIgnoreCase)
@@ -138,36 +131,34 @@ public class MediaService {
         return MapperConstant.MEDIA.map(savedMedia);
     }
 
-    public List<MediaDto> getAllRecent() {
-        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByUploadDateDesc());
+    public List<MediaDto> getMostRecent(Type type, Integer max) {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByUploadDateDesc(type.getCode()))
+                .stream()
+                .limit(DEFAULT_MAX_RESULTS)
+                .collect(Collectors.toList());
     }
 
-    public List<MediaDto> getMostRecent() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByUploadDateDesc());
+    public List<MediaDto> getMostViewed(Type type, Integer max) {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByViewsDesc(type.getCode()))
+                .stream()
+                .filter(m -> m.getViews() != 0)
+                .limit(DEFAULT_MAX_RESULTS)
+                .collect(Collectors.toList());
     }
 
-    public List<MediaDto> getAllViewed() {
-        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByViewsDesc());
+    public List<MediaDto> getMostLiked(Type type, Integer max) {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByLikesDesc(type.getCode()))
+                .stream()
+                .filter(m -> m.getLikes() != 0)
+                .limit(DEFAULT_MAX_RESULTS)
+                .collect(Collectors.toList());
     }
 
-    public List<MediaDto> getMostViewed() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByViewsDesc());
-    }
-
-    public List<MediaDto> getAllLiked() {
-        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByLikesDesc());
-    }
-
-    public List<MediaDto> getMostLiked() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByLikesDesc());
-    }
-
-    public List<MediaDto> getAllRated() {
-        return MapperConstant.MEDIA.map(mediaRepository.findAllByOrderByRatingDesc());
-    }
-
-    public List<MediaDto> getMostRated() {
-        return MapperConstant.MEDIA.map(mediaRepository.findTop5ByOrderByRatingDesc());
+    public List<MediaDto> getMostRated(Type type, Integer max) {
+        return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByRatingDesc(type.getCode()))
+                .stream()
+                .limit(DEFAULT_MAX_RESULTS)
+                .collect(Collectors.toList());
     }
 
 }
