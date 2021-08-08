@@ -1,5 +1,6 @@
 package com.sednar.digital.media.config;
 
+import com.sednar.digital.media.common.converter.StringToGenerationStrategyConverter;
 import com.sednar.digital.media.common.converter.StringToTypeConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -14,6 +15,7 @@ public class MvcConfig implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new StringToTypeConverter());
+        registry.addConverter(new StringToGenerationStrategyConverter());
     }
 
     @Override

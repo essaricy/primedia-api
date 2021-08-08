@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -134,7 +135,7 @@ public class MediaService {
     public List<MediaDto> getMostRecent(Type type, Integer max) {
         return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByUploadDateDesc(type.getCode()))
                 .stream()
-                .limit(DEFAULT_MAX_RESULTS)
+                .limit(Optional.ofNullable(max).orElse(DEFAULT_MAX_RESULTS))
                 .collect(Collectors.toList());
     }
 
@@ -142,7 +143,7 @@ public class MediaService {
         return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByViewsDesc(type.getCode()))
                 .stream()
                 .filter(m -> m.getViews() != 0)
-                .limit(DEFAULT_MAX_RESULTS)
+                .limit(Optional.ofNullable(max).orElse(DEFAULT_MAX_RESULTS))
                 .collect(Collectors.toList());
     }
 
@@ -150,14 +151,14 @@ public class MediaService {
         return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByLikesDesc(type.getCode()))
                 .stream()
                 .filter(m -> m.getLikes() != 0)
-                .limit(DEFAULT_MAX_RESULTS)
+                .limit(Optional.ofNullable(max).orElse(DEFAULT_MAX_RESULTS))
                 .collect(Collectors.toList());
     }
 
     public List<MediaDto> getMostRated(Type type, Integer max) {
         return MapperConstant.MEDIA.map(mediaRepository.findAllByTypeOrderByRatingDesc(type.getCode()))
                 .stream()
-                .limit(DEFAULT_MAX_RESULTS)
+                .limit(Optional.ofNullable(max).orElse(DEFAULT_MAX_RESULTS))
                 .collect(Collectors.toList());
     }
 
