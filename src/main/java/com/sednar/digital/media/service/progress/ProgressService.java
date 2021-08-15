@@ -50,12 +50,12 @@ public class ProgressService {
         return MapperConstant.PROGRESS.map(progress);
     }
 
-    public ProgressDto save(String trackingId, long mediaId) {
+    public ProgressDto initiateProgress(String trackingId, long mediaId) {
         Progress progress = new Progress();
         progress.setId(trackingId);
         progress.setMediaId(mediaId);
         progress.setStartTime(new Timestamp(System.currentTimeMillis()));
-        progress.setStatus(ProgressStatus.REQUESTED.getCode());
+        progress.setStatus(ProgressStatus.INIT.getCode());
         Progress savedProgress = progressRepository.save(progress);
         return MapperConstant.PROGRESS.map(savedProgress);
     }

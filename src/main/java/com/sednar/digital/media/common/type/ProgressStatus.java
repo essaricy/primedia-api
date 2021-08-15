@@ -1,38 +1,36 @@
 package com.sednar.digital.media.common.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ProgressStatus {
 
-    REQUESTED("REQUESTED", "Requested for processing content"),
-    PROCESS_STARTED("PROC_START", "Started processing content"),
-    THUMBNAIL_GENERATED("THUMB_DONE", "Generated Thumbnail"),
-    THUMBNAIL_FAILED("THUMB_FAIL", "Generating Thumbnail failed"),
-    SAVE_DONE("SAVE_DONE", "Saved all media content"),
-    SAVE_FAIL("SAVE_FAIL", "Saving media content failed");
-
-    @Getter
-    private final String code;
-
-    @Getter
-    private final String description;
-
-    ProgressStatus(String code, String description) {
-        this.code = code;
-        this.description = description;
-    }
+    INIT,
+    INIT_FAIL,
+    THUMB_DONE,
+    THUMB_FAIL,
+    DB_DONE,
+    DB_FAIL,
+    FILE_DONE,
+    FILE_FAIL,
+    ALL_DONE;
 
     @JsonCreator
     public static ProgressStatus fromCode(String code) {
         return Arrays.stream(values())
-                .filter(m -> StringUtils.equalsIgnoreCase(m.getCode(), code))
+                .filter(m -> StringUtils.equalsIgnoreCase(m.toString(), code))
                 .findAny().orElse(null);
     }
 
+    @JsonValue
+    public static String toCode(ProgressStatus progressStatus) {
+        return progressStatus.getCode();
+    }
+
+    public String getCode() {
+        return this.toString();
+    }
 }

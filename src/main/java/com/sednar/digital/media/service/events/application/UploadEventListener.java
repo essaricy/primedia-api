@@ -1,15 +1,13 @@
 package com.sednar.digital.media.service.events.application;
 
-import com.sednar.digital.media.common.file.FileSystem;
+import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.ProgressStatus;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.common.exception.MediaException;
+import com.sednar.digital.media.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.repo.entity.Progress;
-import com.sednar.digital.media.resource.v1.model.ProgressDto;
-import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.content.image.ImageContentProcessor;
 import com.sednar.digital.media.service.content.video.VideoContentProcessor;
 import com.sednar.digital.media.service.events.UploadEvent;
@@ -36,16 +34,20 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
 
     private final MediaRepository mediaRepository;
 
+    private final FileSystemClient fileSystemClient;
+
     @Autowired
     UploadEventListener(
             ImageContentProcessor imageContentProcessor,
             VideoContentProcessor videoContentProcessor,
             ProgressRepository progressRepository,
-            MediaRepository mediaRepository) {
+            MediaRepository mediaRepository,
+            FileSystemClient fileSystemClient) {
         this.imageContentProcessor = imageContentProcessor;
         this.videoContentProcessor = videoContentProcessor;
         this.progressRepository = progressRepository;
         this.mediaRepository = mediaRepository;
+        this.fileSystemClient = fileSystemClient;
     }
 
     @Override
@@ -55,50 +57,80 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         String trackingId = uploadEvent.getTrackingId();
         log.info("Received Event, trackingId={}", trackingId);
 
-        File uploadedFile = FileSystem.get(trackingId);
-        log.info("Started processing the file, trackingId={}", trackingId);
-
-        Progress progress = progressRepository.findById(trackingId)
-                .orElseThrow(() -> new ValidationException("Invalid tracking id: " + trackingId));
-
-        setProcessStatus(progress, ProgressStatus.PROCESS_STARTED);
-        File thumb = null;
         double videoLength = 0;
+        Progress progress = null;
+        File workingFile = null;
+        File thumb = null;
+        // Check progress and read file
         try {
-            if (type == Type.VIDEO) {
-                videoLength = videoContentProcessor.getVideoLength(uploadedFile);
+            progress = progressRepository.findById(trackingId)
+                    .orElseThrow(() -> new ValidationException("Invalid tracking id: " + trackingId));
+            workingFile = fileSystemClient.getWorkingFile(trackingId);
+            log.info("Started processing the file, trackingId={}", trackingId);
+        } catch (Exception e) {
+            log.info("Unable to locate the working file, trackingId={}, error={}", trackingId, e);
+            updateOnException(progress, ProgressStatus.INIT_FAIL, e, workingFile);
+        }
+        // Generate Thumbnails
+        try {
+             if (type == Type.VIDEO) {
+                videoLength = videoContentProcessor.getVideoLength(workingFile);
                 log.info("Obtained video length, trackingId={}, length={}", trackingId, videoLength);
-                thumb = videoContentProcessor.generateThumbnail(uploadedFile, videoLength);
+                thumb = videoContentProcessor.generateThumbnail(workingFile, videoLength);
             } else if (type == Type.IMAGE) {
-                thumb = imageContentProcessor.generateThumbnail(uploadedFile);
+                thumb = imageContentProcessor.generateThumbnail(workingFile);
             }
             log.info("Generated thumbnail, trackingId={}", trackingId);
-            setProcessStatus(progress, ProgressStatus.THUMBNAIL_GENERATED);
+            setProcessStatus(progress, ProgressStatus.THUMB_DONE);
         } catch (Exception e) {
             log.info("Generating thumbnail failed, trackingId={}, error={}", trackingId, e);
-            setProcessStatus(progress, ProgressStatus.THUMBNAIL_FAILED, e.getMessage());
-            FileUtils.deleteQuietly(uploadedFile);
-            FileUtils.deleteQuietly(thumb);
-            throw new MediaException(e.getMessage(), e);
+            updateOnException(progress, ProgressStatus.THUMB_FAIL, e, workingFile, thumb);
         }
+        // Save Content
         try {
             if (type == Type.VIDEO) {
-                videoContentProcessor.saveContent(mediaId, uploadedFile, thumb);
+                videoContentProcessor.saveContent(mediaId, workingFile, thumb);
                 Media media = mediaRepository.findById(mediaId)
                         .orElseThrow(() -> new ValidationException("Invalid media id"));
                 media.setDuration(DurationUtil.getDurationStamp(videoLength));
                 mediaRepository.save(media);
             } else if (type == Type.IMAGE) {
-                imageContentProcessor.saveContent(mediaId, uploadedFile, thumb);
+                imageContentProcessor.saveContent(mediaId, workingFile, thumb);
             }
-            log.info("Saved all content, trackingId={}", trackingId);
-            progress.setEndTime(new Timestamp(System.currentTimeMillis()));
-            setProcessStatus(progress, ProgressStatus.SAVE_DONE);
+            log.info("Saved to database successfully, trackingId={}", trackingId);
+            setProcessStatus(progress, ProgressStatus.DB_DONE);
         } catch (Exception e) {
-            log.info("Saving all content failed, trackingId={}, error={}", trackingId, e);
-            setProcessStatus(progress, ProgressStatus.SAVE_FAIL, e.getMessage());
+            log.info("Saving content/thumbnail to database failed, trackingId={}, error={}", trackingId, e);
+            updateOnException(progress, ProgressStatus.DB_FAIL, e, workingFile, thumb);
         }
-        FileUtils.deleteQuietly(uploadedFile);
+        // Copy file to file system storage
+        try {
+            fileSystemClient.store(type, workingFile, thumb);
+            log.info("Saved to file system successfully, trackingId={}", trackingId);
+            setProcessStatus(progress, ProgressStatus.FILE_DONE);
+        } catch (Exception e) {
+            log.info("Saving content/thumbnail to file system failed, trackingId={}, error={}", trackingId, e);
+            updateOnException(progress, ProgressStatus.FILE_FAIL, e, workingFile, thumb);
+        }
+        progress.setEndTime(new Timestamp(System.currentTimeMillis()));
+        setProcessStatus(progress, ProgressStatus.ALL_DONE);
+        deleteWorkingFiles(workingFile, thumb);
+    }
+
+    private void updateOnException(
+            Progress progress, ProgressStatus status, Exception e, File workingFile) {
+        updateOnException(progress, status, e, workingFile, null);
+    }
+
+    private void updateOnException(
+            Progress progress, ProgressStatus status, Exception e, File workingFile, File thumb) {
+        setProcessStatus(progress, status, e.getMessage());
+        deleteWorkingFiles(workingFile, thumb);
+        throw new MediaException(e.getMessage(), e);
+    }
+
+    private void deleteWorkingFiles(File workingFile, File thumb) {
+        FileUtils.deleteQuietly(workingFile);
         FileUtils.deleteQuietly(thumb);
     }
 
@@ -109,8 +141,7 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
     private void setProcessStatus(Progress progress, ProgressStatus status, String errorMessage) {
         progress.setStatus(status.getCode());
         progress.setErrorMessage(errorMessage);
-        Progress savedProgress = progressRepository.save(progress);
-        ProgressDto progressDto = MapperConstant.PROGRESS.map(savedProgress);
+        progressRepository.save(progress);
         log.info("Updated process status of trackingId={} to {}", progress.getId(), status);
     }
 

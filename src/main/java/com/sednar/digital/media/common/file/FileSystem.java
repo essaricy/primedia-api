@@ -9,6 +9,7 @@ import java.io.IOException;
 
 @UtilityClass
 @Slf4j
+@Deprecated
 public class FileSystem {
 
     private static final File APP_DIR = new File(FileUtils.getUserDirectory(), ".media");

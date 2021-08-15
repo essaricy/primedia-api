@@ -1,11 +1,11 @@
 package com.sednar.digital.media.service;
 
 import com.sednar.digital.media.common.constants.MediaConstants;
-import com.sednar.digital.media.common.file.FileSystem;
+import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.common.exception.MediaException;
+import com.sednar.digital.media.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
@@ -42,12 +42,16 @@ public class MediaService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final FileSystemClient fileSystemClient;
+
     @Autowired
     public MediaService(MediaRepository mediaRepository,
                         ProgressService progressService,
+                        FileSystemClient fileSystemClient,
                         ApplicationEventPublisher applicationEventPublisher) {
         this.mediaRepository = mediaRepository;
         this.progressService = progressService;
+        this.fileSystemClient = fileSystemClient;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -90,12 +94,11 @@ public class MediaService {
             if (CollectionUtils.isNotEmpty(tags)) {
                 media.setTags(String.join(MediaConstants.TAG_SEPARATOR, tags));
             }
-            Media savedMedia = mediaRepository.save(media);
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
-            FileSystem.save(trackingId, multipartFile.getBytes());
-            log.info("Saved to local disk, trackingId={}", trackingId);
-            ProgressDto savedProgress = progressService.save(trackingId, savedMedia.getId());
+            fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
+            Media savedMedia = mediaRepository.save(media);
+            ProgressDto savedProgress = progressService.initiateProgress(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
                     new UploadEvent(this, type, savedMedia.getId(), trackingId));
             return savedProgress;

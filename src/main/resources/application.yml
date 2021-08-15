@@ -37,3 +37,10 @@ app:
       width: 600
       height: 600
       suffix: _thumb.jpg
+  file-system:
+    baseDir: J:\\Softwares\\Apps\\AppData\\primedia
+    binDirName: bin
+    storageDirName: storage
+    thumbnailDirName: thumbnail
+    workDirName: work
+    logsDirName: logs
