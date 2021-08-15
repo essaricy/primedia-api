@@ -5,7 +5,7 @@ import com.sednar.digital.media.common.file.FileSystem;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.exception.MediaException;
+import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.ValidationException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -66,10 +67,10 @@ public class MediaService {
             long size = multipartFile.getSize();
             log.info("upload requested, type={}, name={}, size={}", type, name, size);
             if (type == null) {
-                throw new MediaException("Invalid media type");
+                throw new ValidationException("Invalid media type");
             }
             if (StringUtils.isBlank(name)) {
-                throw new MediaException("Name is required");
+                throw new ValidationException("Name is required");
             }
             Media media = new Media();
             media.setType(type.getCode());
@@ -104,7 +105,7 @@ public class MediaService {
     }
 
     public MediaDto update(Long id, MediaRequest request) {
-        Media media = mediaRepository.findById(id).orElseThrow(() -> new MediaException("Invalid media id"));
+        Media media = mediaRepository.findById(id).orElseThrow(() -> new ValidationException("Invalid media id"));
         String name = request.getName();
         if (StringUtils.isNotBlank(name)) {
             media.setName(name);
@@ -130,6 +131,10 @@ public class MediaService {
         }
         Media savedMedia = mediaRepository.save(media);
         return MapperConstant.MEDIA.map(savedMedia);
+    }
+
+    public List<MediaDto> getAll(Type type) {
+        return MapperConstant.MEDIA.map(mediaRepository.findByType(type.getCode()));
     }
 
     public List<MediaDto> getMostRecent(Type type, Integer max) {

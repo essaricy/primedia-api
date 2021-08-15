@@ -3,6 +3,7 @@ package com.sednar.digital.media.service.events.application;
 import com.sednar.digital.media.common.file.FileSystem;
 import com.sednar.digital.media.common.type.ProgressStatus;
 import com.sednar.digital.media.common.type.Type;
+import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
@@ -78,7 +79,7 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
             setProcessStatus(progress, ProgressStatus.THUMBNAIL_FAILED, e.getMessage());
             FileUtils.deleteQuietly(uploadedFile);
             FileUtils.deleteQuietly(thumb);
-            throw new ValidationException(e);
+            throw new MediaException(e.getMessage(), e);
         }
         try {
             if (type == Type.VIDEO) {

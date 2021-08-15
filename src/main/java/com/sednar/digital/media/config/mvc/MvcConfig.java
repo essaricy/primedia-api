@@ -1,4 +1,4 @@
-package com.sednar.digital.media.config;
+package com.sednar.digital.media.config.mvc;
 
 import com.sednar.digital.media.common.converter.StringToGenerationStrategyConverter;
 import com.sednar.digital.media.common.converter.StringToTypeConverter;

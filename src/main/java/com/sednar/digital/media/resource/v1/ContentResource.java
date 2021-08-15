@@ -6,7 +6,6 @@ import com.sednar.digital.media.service.ContentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ public class ContentResource {
         this.service = service;
     }
 
-    @GetMapping(path = "/{type}/{id}",
+    /*@GetMapping(path = "/{type}/{id}",
             produces={ MediaType.IMAGE_JPEG_VALUE, VIDEO_MP4 })
     public ResponseEntity<byte[]> getContent(
             @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
@@ -44,7 +43,7 @@ public class ContentResource {
                 : VIDEO_MP4);
         headers.add("Content-Length", Long.toString(content.length));
         return new ResponseEntity<>(content, headers, HttpStatus.OK);
-    }
+    }*/
 
     @GetMapping(path = "/{type}/{id}/thumb",
             produces={ MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE })
@@ -53,6 +52,18 @@ public class ContentResource {
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
             @PathVariable long id) {
         return service.getThumbnail(type, id);
+    }
+
+    @GetMapping(path = "/image/{id}", produces={ MediaType.IMAGE_JPEG_VALUE })
+    public ResponseEntity<byte[]> getImage(@PathVariable long id) {
+        byte[] content = service.getContent(Type.IMAGE, id);
+        return new ResponseEntity<>(content, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/video/{id}", produces={ VIDEO_MP4 })
+    public ResponseEntity<byte[]> getVide(@PathVariable long id) {
+        byte[] content = service.getContent(Type.VIDEO, id);
+        return new ResponseEntity<>(content, HttpStatus.OK);
     }
 
 }

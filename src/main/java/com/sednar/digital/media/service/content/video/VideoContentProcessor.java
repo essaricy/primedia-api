@@ -3,7 +3,6 @@ package com.sednar.digital.media.service.content.video;
 import com.sednar.digital.media.repo.VideoRepository;
 import com.sednar.digital.media.repo.entity.MediaContent;
 import com.sednar.digital.media.repo.entity.Video;
-import com.sednar.digital.media.service.config.properties.VideoProcessingProps;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +14,13 @@ import java.io.IOException;
 @Component
 public class VideoContentProcessor {
 
-    private final VideoProcessingProps properties;
-
     private final VideoRepository videoRepository;
 
     @Autowired
     private FFmpegVideoService fFmpegVideoService;
 
     @Autowired
-    VideoContentProcessor(VideoProcessingProps properties,
-                          VideoRepository videoRepository) {
-        this.properties = properties;
+    VideoContentProcessor(VideoRepository videoRepository) {
         this.videoRepository = videoRepository;
     }
 

@@ -15,7 +15,7 @@ public enum Rating {
     EXCELLENT(5);
 
     @Getter
-    private int code;
+    private final int code;
 
     Rating(int code) {
         this.code = code;

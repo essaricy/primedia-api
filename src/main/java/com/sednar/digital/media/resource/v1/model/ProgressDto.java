@@ -22,4 +22,6 @@ public class ProgressDto {
 
     private String errorMessage;
 
+    private MediaDto media;
+
 }

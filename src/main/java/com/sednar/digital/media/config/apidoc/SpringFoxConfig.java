@@ -1,4 +1,4 @@
-package com.sednar.digital.media.config;
+package com.sednar.digital.media.config.apidoc;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

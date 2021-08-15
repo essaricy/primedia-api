@@ -1,6 +1,6 @@
 package com.sednar.digital.media.common.util;
 
-import com.sednar.digital.media.exception.MediaException;
+import com.sednar.digital.media.common.exception.MediaException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 

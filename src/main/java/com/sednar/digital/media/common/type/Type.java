@@ -13,7 +13,7 @@ public enum Type {
     VIDEO("V");
 
     @Getter
-    private String code;
+    private final String code;
 
     Type(String code) {
         this.code = code;

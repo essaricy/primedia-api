@@ -18,10 +18,10 @@ public enum ProgressStatus {
     SAVE_FAIL("SAVE_FAIL", "Saving media content failed");
 
     @Getter
-    private String code;
+    private final String code;
 
     @Getter
-    private String description;
+    private final String description;
 
     ProgressStatus(String code, String description) {
         this.code = code;

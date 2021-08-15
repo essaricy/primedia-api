@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class WebSocketResource {
 
-    private SimpMessagingTemplate template;
+    private final SimpMessagingTemplate template;
 
     @Autowired
     WebSocketResource(SimpMessagingTemplate template) {
@@ -20,7 +20,7 @@ public class WebSocketResource {
 
     @MessageMapping("/hello1")
     @SendTo("/topic/greetings")
-    public String greeting(String date) throws Exception {
+    public String greeting(String date) {
         return date + ": Hello World 1";
     }
 

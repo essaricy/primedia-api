@@ -42,8 +42,7 @@ public class FFmpegVideoService {
                 properties.getProcessorPath().getAbsolutePath(),
                 properties.getInfoProvider(),
                 video.getAbsolutePath());
-        String output = ProcessUtil.execute(command);
-        return output;
+        return ProcessUtil.execute(command);
     }
 
 }

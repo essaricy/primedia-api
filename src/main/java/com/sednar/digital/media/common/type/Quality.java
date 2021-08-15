@@ -14,7 +14,7 @@ public enum Quality {
     HD(4);
 
     @Getter
-    private int code;
+    private final int code;
 
     Quality(int code) {
         this.code = code;

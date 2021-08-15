@@ -7,13 +7,13 @@ import org.springframework.context.ApplicationEvent;
 public class UploadEvent extends ApplicationEvent {
 
     @Getter
-    private Type type;
+    private final Type type;
 
     @Getter
-    private Long mediaId;
+    private final Long mediaId;
 
     @Getter
-    private String trackingId;
+    private final String trackingId;
 
     public UploadEvent(Object source, Type type, Long mediaId, String trackingId) {
         super(source);

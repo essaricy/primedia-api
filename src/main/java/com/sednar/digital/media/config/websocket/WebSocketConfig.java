@@ -1,4 +1,4 @@
-package com.sednar.digital.media.config;
+package com.sednar.digital.media.config.websocket;
 
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.stereotype.Component;
