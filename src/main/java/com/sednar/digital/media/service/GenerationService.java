@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@Deprecated
 public class GenerationService {
 
     private final ThumbsGenerationService thumbsGenerationService;

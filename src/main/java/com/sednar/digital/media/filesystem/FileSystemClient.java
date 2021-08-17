@@ -2,7 +2,6 @@ package com.sednar.digital.media.filesystem;
 
 import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.Type;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
@@ -37,16 +36,43 @@ public class FileSystemClient {
         return savedFile;
     }
 
-    public void store(Type type, File file, File thumb) throws IOException {
+    public void store(Type type, Long mediaId, File srcFile, File srcThumb) throws IOException {
+        String fileName = String.valueOf(mediaId);
+
         File storageDir = fileSystemApplication.getStorageDir(type);
-        File thumbnailDir = fileSystemApplication.getThumbnailDir(type);
-        FileUtils.copyFileToDirectory(file, storageDir);
-        log.info("Stored media file: {}", file.getName());
-        FileUtils.copyFileToDirectory(thumb, thumbnailDir);
-        log.info("Stored thumbnail file: {}", thumb.getName());
+        File finalFile = new File(storageDir, fileName);
+        FileUtils.copyFile(srcFile, finalFile);
+        log.info("Stored media file: {}", finalFile.getName());
+
+        File thumbDir = fileSystemApplication.getThumbnailDir(type);
+        File finalThumb = new File(thumbDir, fileName);
+        FileUtils.copyFile(srcThumb, finalThumb);
+        log.info("Stored thumbnail file: {}", finalThumb.getName());
     }
 
-    public File getMedia(Type type, String id) throws IOException {
+    public void store(Type type, String id, byte[] srcContent, byte[] srcThumb) throws IOException {
+        File storageDir = fileSystemApplication.getStorageDir(type);
+        File finalFile = new File(storageDir, id);
+        FileUtils.writeByteArrayToFile(finalFile, srcContent);
+        log.info("Stored media file: {}", finalFile.getName());
+
+        File thumbDir = fileSystemApplication.getThumbnailDir(type);
+        File finalThumb = new File(thumbDir, id);
+        FileUtils.writeByteArrayToFile(finalThumb, srcThumb);
+        log.info("Stored thumbnail file: {}", finalThumb.getName());
+    }
+
+    public boolean exists(Type type, String id) {
+        File storageDir = fileSystemApplication.getStorageDir(type);
+        File contentFile = new File(storageDir, id);
+
+        File thumbDir = fileSystemApplication.getThumbnailDir(type);
+        File thumbFile = new File(thumbDir, id);
+
+        return contentFile.exists() && thumbFile.exists();
+    }
+
+    public File getMedia(Type type, String id) {
         File storageDir = fileSystemApplication.getStorageDir(type);
         File contentFile = new File(storageDir, id);
         if (!contentFile.exists()) {
@@ -55,7 +81,7 @@ public class FileSystemClient {
         return contentFile;
     }
 
-    public File getThumbnail(Type type, String id) throws IOException {
+    public File getThumbnail(Type type, String id) {
         File thumbnailDir = fileSystemApplication.getThumbnailDir(type);
         File thumbFile = new File(thumbnailDir, id);
         if (!thumbFile.exists()) {

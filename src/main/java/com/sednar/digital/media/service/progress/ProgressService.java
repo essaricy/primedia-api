@@ -1,6 +1,5 @@
 package com.sednar.digital.media.service.progress;
 
-import com.sednar.digital.media.common.type.ProgressStatus;
 import com.sednar.digital.media.common.type.Type;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.ProgressRepository;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ValidationException;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -48,16 +46,6 @@ public class ProgressService {
         Progress progress = progressRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Progress not found for the id: " + id));
         return MapperConstant.PROGRESS.map(progress);
-    }
-
-    public ProgressDto initiateProgress(String trackingId, long mediaId) {
-        Progress progress = new Progress();
-        progress.setId(trackingId);
-        progress.setMediaId(mediaId);
-        progress.setStartTime(new Timestamp(System.currentTimeMillis()));
-        progress.setStatus(ProgressStatus.INIT.getCode());
-        Progress savedProgress = progressRepository.save(progress);
-        return MapperConstant.PROGRESS.map(savedProgress);
     }
 
 }

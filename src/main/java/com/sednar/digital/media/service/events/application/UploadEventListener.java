@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ValidationException;
 import java.io.File;
 import java.sql.Timestamp;
 
@@ -52,25 +51,17 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
 
     @Override
     public void onApplicationEvent(UploadEvent uploadEvent) {
-        Type type = uploadEvent.getType();
-        Long mediaId = uploadEvent.getMediaId();
-        String trackingId = uploadEvent.getTrackingId();
+        Media media = uploadEvent.getMedia();
+        Progress progress = uploadEvent.getProgress();
+        File workingFile = uploadEvent.getWorkingFile();
+        Type type = Type.fromCode(media.getType());
+        Long mediaId = progress.getMediaId();
+        String trackingId = progress.getId();
         log.info("Received Event, trackingId={}", trackingId);
 
         double videoLength = 0;
-        Progress progress = null;
-        File workingFile = null;
         File thumb = null;
-        // Check progress and read file
-        try {
-            progress = progressRepository.findById(trackingId)
-                    .orElseThrow(() -> new ValidationException("Invalid tracking id: " + trackingId));
-            workingFile = fileSystemClient.getWorkingFile(trackingId);
-            log.info("Started processing the file, trackingId={}", trackingId);
-        } catch (Exception e) {
-            log.info("Unable to locate the working file, trackingId={}, error={}", trackingId, e);
-            updateOnException(progress, ProgressStatus.INIT_FAIL, e, workingFile);
-        }
+
         // Generate Thumbnails
         try {
              if (type == Type.VIDEO) {
@@ -90,8 +81,6 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         try {
             if (type == Type.VIDEO) {
                 videoContentProcessor.saveContent(mediaId, workingFile, thumb);
-                Media media = mediaRepository.findById(mediaId)
-                        .orElseThrow(() -> new ValidationException("Invalid media id"));
                 media.setDuration(DurationUtil.getDurationStamp(videoLength));
                 mediaRepository.save(media);
             } else if (type == Type.IMAGE) {
@@ -105,7 +94,7 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         }
         // Copy file to file system storage
         try {
-            fileSystemClient.store(type, workingFile, thumb);
+            fileSystemClient.store(type, mediaId, workingFile, thumb);
             log.info("Saved to file system successfully, trackingId={}", trackingId);
             setProcessStatus(progress, ProgressStatus.FILE_DONE);
         } catch (Exception e) {
@@ -115,11 +104,6 @@ public class UploadEventListener implements ApplicationListener<UploadEvent> {
         progress.setEndTime(new Timestamp(System.currentTimeMillis()));
         setProcessStatus(progress, ProgressStatus.ALL_DONE);
         deleteWorkingFiles(workingFile, thumb);
-    }
-
-    private void updateOnException(
-            Progress progress, ProgressStatus status, Exception e, File workingFile) {
-        updateOnException(progress, status, e, workingFile, null);
     }
 
     private void updateOnException(

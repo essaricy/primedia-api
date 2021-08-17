@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 
+@Deprecated
 @RestController
 @RequestMapping("/generate")
 @Api(tags = "Generation", value = "APIs related to generation of media attributes")

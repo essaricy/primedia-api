@@ -7,13 +7,14 @@ import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
 import com.sednar.digital.media.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.MediaRepository;
+import com.sednar.digital.media.repo.ProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
+import com.sednar.digital.media.repo.entity.Progress;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
 import com.sednar.digital.media.resource.v1.model.MediaRequest;
 import com.sednar.digital.media.resource.v1.model.ProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.events.UploadEvent;
-import com.sednar.digital.media.service.progress.ProgressService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.ValidationException;
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
 
-    private final ProgressService progressService;
+    private final ProgressRepository progressRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -46,11 +48,11 @@ public class MediaService {
 
     @Autowired
     public MediaService(MediaRepository mediaRepository,
-                        ProgressService progressService,
+                        ProgressRepository progressRepository,
                         FileSystemClient fileSystemClient,
                         ApplicationEventPublisher applicationEventPublisher) {
         this.mediaRepository = mediaRepository;
-        this.progressService = progressService;
+        this.progressRepository = progressRepository;
         this.fileSystemClient = fileSystemClient;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -96,12 +98,12 @@ public class MediaService {
             }
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
-            fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
+            File workingFile = fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
             Media savedMedia = mediaRepository.save(media);
-            ProgressDto savedProgress = progressService.initiateProgress(trackingId, savedMedia.getId());
+            Progress savedProgress = progressRepository.initiateProgress(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
-                    new UploadEvent(this, type, savedMedia.getId(), trackingId));
-            return savedProgress;
+                    new UploadEvent(this, savedMedia, savedProgress, workingFile));
+            return MapperConstant.PROGRESS.map(savedProgress);
         } catch(Exception e) {
             throw new MediaException("Unable to store " + type + ". ERROR=" + e.getMessage());
         }

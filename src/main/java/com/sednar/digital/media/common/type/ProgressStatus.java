@@ -9,7 +9,6 @@ import java.util.Arrays;
 public enum ProgressStatus {
 
     INIT,
-    INIT_FAIL,
     THUMB_DONE,
     THUMB_FAIL,
     DB_DONE,
