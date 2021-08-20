@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 @Component
 @Slf4j
@@ -24,15 +25,6 @@ public class FileSystemClient {
         File savedFile = new File(workDir, trackingId);
         FileUtils.writeByteArrayToFile(savedFile, data);
         log.info("Created a working file with trackingId={}", trackingId);
-        return savedFile;
-    }
-
-    public File getWorkingFile(String trackingId) throws IOException {
-        File workDir = fileSystemApplication.getWorkDir();
-        File savedFile = new File(workDir, trackingId);
-        if (!savedFile.exists()) {
-            throw new MediaException("No file found with name: " + trackingId);
-        }
         return savedFile;
     }
 
@@ -70,6 +62,11 @@ public class FileSystemClient {
         File thumbFile = new File(thumbDir, id);
 
         return contentFile.exists() && thumbFile.exists();
+    }
+
+    public Collection<File> list(Type type) {
+        File storageDir = fileSystemApplication.getStorageDir(type);
+        return FileUtils.listFiles(storageDir, null, false);
     }
 
     public File getMedia(Type type, String id) {

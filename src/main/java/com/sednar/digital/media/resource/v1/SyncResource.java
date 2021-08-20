@@ -2,7 +2,8 @@ package com.sednar.digital.media.resource.v1;
 
 import com.sednar.digital.media.common.constants.MediaConstants;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.service.FileSystemService;
+import com.sednar.digital.media.repo.entity.SyncProgress;
+import com.sednar.digital.media.service.sync.SyncService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,22 +15,29 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("/file-system")
-@Api(tags = "Filesystem", value = "APIs related to file system")
-public class FileSystemResource {
+@RequestMapping("/sync")
+@Api(tags = "Sync", value = "APIs related to synchronization of file system and database")
+public class SyncResource {
 
-    private final FileSystemService service;
+    private final SyncService service;
 
     @Autowired
-    FileSystemResource(FileSystemService service) {
+    SyncResource(SyncService service) {
         this.service = service;
     }
 
-    @PatchMapping(path = "/{type}/sync")
-    public void sync(
+    @PatchMapping(path = "/{type}/up")
+    public SyncProgress syncUp(
             @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type) {
-        service.sync(type);
+        return service.syncUp(type);
+    }
+
+    @PatchMapping(path = "/{type}/down")
+    public SyncProgress syncDown(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type) {
+        return service.syncDown(type);
     }
 
 }
