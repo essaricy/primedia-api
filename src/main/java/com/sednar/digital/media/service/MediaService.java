@@ -5,14 +5,14 @@ import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.filesystem.FileSystemClient;
+import com.sednar.digital.media.service.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.MediaRepository;
-import com.sednar.digital.media.repo.ProgressRepository;
+import com.sednar.digital.media.repo.UploadProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
-import com.sednar.digital.media.repo.entity.Progress;
+import com.sednar.digital.media.repo.entity.UploadProgress;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
-import com.sednar.digital.media.resource.v1.model.MediaRequest;
-import com.sednar.digital.media.resource.v1.model.ProgressDto;
+import com.sednar.digital.media.resource.v1.model.MediaRequestDto;
+import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.events.UploadEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
 
-    private final ProgressRepository progressRepository;
+    private final UploadProgressRepository uploadProgressRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -48,11 +48,11 @@ public class MediaService {
 
     @Autowired
     public MediaService(MediaRepository mediaRepository,
-                        ProgressRepository progressRepository,
+                        UploadProgressRepository uploadProgressRepository,
                         FileSystemClient fileSystemClient,
                         ApplicationEventPublisher applicationEventPublisher) {
         this.mediaRepository = mediaRepository;
-        this.progressRepository = progressRepository;
+        this.uploadProgressRepository = uploadProgressRepository;
         this.fileSystemClient = fileSystemClient;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -66,7 +66,7 @@ public class MediaService {
                 .collect(Collectors.toList());
     }
 
-    public ProgressDto upload(Type type, MediaRequest request, MultipartFile multipartFile)
+    public UploadProgressDto upload(Type type, MediaRequestDto request, MultipartFile multipartFile)
             throws MediaException {
         try {
             String name = request.getName();
@@ -100,16 +100,16 @@ public class MediaService {
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
             File workingFile = fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
             Media savedMedia = mediaRepository.save(media);
-            Progress savedProgress = progressRepository.initiateProgress(trackingId, savedMedia.getId());
+            UploadProgress savedUploadProgress = uploadProgressRepository.initiate(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
-                    new UploadEvent(this, savedMedia, savedProgress, workingFile));
-            return MapperConstant.PROGRESS.map(savedProgress);
+                    new UploadEvent(this, savedMedia, savedUploadProgress, workingFile));
+            return MapperConstant.UPLOAD_PROGRESS.map(savedUploadProgress);
         } catch(Exception e) {
             throw new MediaException("Unable to store " + type + ". ERROR=" + e.getMessage());
         }
     }
 
-    public MediaDto update(Long id, MediaRequest request) {
+    public MediaDto update(Long id, MediaRequestDto request) {
         Media media = mediaRepository.findById(id).orElseThrow(() -> new ValidationException("Invalid media id"));
         String name = request.getName();
         if (StringUtils.isNotBlank(name)) {

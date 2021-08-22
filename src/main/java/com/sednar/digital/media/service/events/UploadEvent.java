@@ -1,7 +1,7 @@
 package com.sednar.digital.media.service.events;
 
 import com.sednar.digital.media.repo.entity.Media;
-import com.sednar.digital.media.repo.entity.Progress;
+import com.sednar.digital.media.repo.entity.UploadProgress;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -13,15 +13,15 @@ public class UploadEvent extends ApplicationEvent {
     private final Media media;
 
     @Getter
-    private final Progress progress;
+    private final UploadProgress uploadProgress;
 
     @Getter
     private final File workingFile;
 
-    public UploadEvent(Object source, Media media, Progress progress, File workingFile) {
+    public UploadEvent(Object source, Media media, UploadProgress uploadProgress, File workingFile) {
         super(source);
         this.media = media;
-        this.progress = progress;
+        this.uploadProgress = uploadProgress;
         this.workingFile = workingFile;
     }
 

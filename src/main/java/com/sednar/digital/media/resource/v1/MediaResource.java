@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sednar.digital.media.common.constants.MediaConstants;
 import com.sednar.digital.media.common.type.Type;
 import com.sednar.digital.media.resource.v1.model.MediaDto;
-import com.sednar.digital.media.resource.v1.model.MediaRequest;
-import com.sednar.digital.media.resource.v1.model.ProgressDto;
+import com.sednar.digital.media.resource.v1.model.MediaRequestDto;
+import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
 import com.sednar.digital.media.service.MediaService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,21 +43,21 @@ public class MediaResource {
 
     @PostMapping("/{type}")
     @ApiOperation(value = "Upload any media type")
-    public ProgressDto upload(
+    public UploadProgressDto upload(
             @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
             @RequestParam("request") String request,
             @RequestParam("file") MultipartFile file) throws IOException {
-        MediaRequest mediaRequest = new ObjectMapper().readValue(request, MediaRequest.class);
-        return service.upload(type, mediaRequest, file);
+        MediaRequestDto mediaRequestDto = new ObjectMapper().readValue(request, MediaRequestDto.class);
+        return service.upload(type, mediaRequestDto, file);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Update media attributes")
     public MediaDto update(
             @PathVariable(name="id") long id,
-            @RequestBody MediaRequest mediaRequest) {
-        return service.update(id, mediaRequest);
+            @RequestBody MediaRequestDto mediaRequestDto) {
+        return service.update(id, mediaRequestDto);
     }
 
     @GetMapping("/{type}/recent")
