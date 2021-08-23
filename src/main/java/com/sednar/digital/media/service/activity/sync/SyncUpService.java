@@ -72,8 +72,6 @@ public class SyncUpService {
             Optional<Media> mediaOptional = mediaRepository.findById(id);
             try {
                 if (mediaOptional.isPresent()) {
-                    Media media = mediaOptional.get();
-                    Thread.sleep(2000);
                     File thumb = imageContentProcessor.generateThumbnail(file);
                     imageContentProcessor.saveContent(id, file, thumb);
                     activityProgressRepository.updateOnSuccess(++success, activityProgress);

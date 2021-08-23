@@ -66,6 +66,8 @@ public class SyncDownService {
                 Image image = imageRepository.findById(mediaId)
                         .orElseThrow(() -> new ValidationException("No image found for id " + mediaId));
                 fileSystemClient.store(Type.IMAGE, fileName, image.getContent(), image.getThumbnail());
+                image.setContent(null);
+                image.setThumbnail(null);
                 activityProgressRepository.updateOnSuccess(++success, activityProgress);
                 log.info("SyncDown successful for the media: : {}", mediaId);
             } catch (Exception e) {
@@ -90,6 +92,8 @@ public class SyncDownService {
                     Video video = videoRepository.findById(mediaId)
                             .orElseThrow(() -> new ValidationException("No video found for id " + mediaId));
                     fileSystemClient.store(Type.IMAGE, fileName, video.getContent(), video.getThumbnail());
+                    video.setContent(null);
+                    video.setThumbnail(null);
                     activityProgressRepository.updateOnSuccess(++success, activityProgress);
                     log.info("SyncDown successful for the media: : {}", mediaId);
                 }

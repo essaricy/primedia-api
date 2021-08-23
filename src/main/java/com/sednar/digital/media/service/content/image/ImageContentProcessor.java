@@ -42,7 +42,10 @@ public class ImageContentProcessor {
         if (thumb != null) {
             image.setThumbnail(FileUtils.readFileToByteArray(thumb));
         }
-        return imageRepository.save(image);
+        Image savedImage = imageRepository.save(image);
+        image.setContent(null);
+        image.setThumbnail(null);
+        return savedImage;
     }
 
 }

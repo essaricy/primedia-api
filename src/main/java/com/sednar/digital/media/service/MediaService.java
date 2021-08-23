@@ -58,6 +58,7 @@ public class MediaService {
     }
 
     public List<MediaDto> search(Type type, String searchText) {
+        // TODO: enhance search tokens
         List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
         List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
         return list.stream()
@@ -136,10 +137,6 @@ public class MediaService {
         }
         Media savedMedia = mediaRepository.save(media);
         return MapperConstant.MEDIA.map(savedMedia);
-    }
-
-    public List<MediaDto> getAll(Type type) {
-        return MapperConstant.MEDIA.map(mediaRepository.findByType(type.getCode()));
     }
 
     public List<MediaDto> getMostRecent(Type type, Integer max) {

@@ -25,6 +25,7 @@ public class ContentService {
     }
 
     public byte[] getThumbnail(Type type, long id) {
+        // TODO: Read from the file system
         if (type == Type.VIDEO) {
             ThumbnailColumn column = videoRepository.getById(id);
             return column == null ? null : column.getThumbnail();
@@ -35,6 +36,7 @@ public class ContentService {
     }
 
     public byte[] getContent(Type type, long id) {
+        // TODO: Read from the file system
         ContentColumn column = null;
         if (type == Type.VIDEO) {
             column = videoRepository.readById(id);

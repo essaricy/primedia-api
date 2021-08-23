@@ -67,6 +67,7 @@ public class VideoThumbsGenerationService {
                 video.setThumbnail(FileUtils.readFileToByteArray(thumbnail));
                 log.info("Generated thumbnail for the id={}", id);
                 videoRepository.save(video);
+                video.setThumbnail(null);
                 // Save a copy to the file system
                 fileSystemClient.store(Type.VIDEO, id, file, thumbnail);
                 log.info("Saved thumbnail for the id={}", id);

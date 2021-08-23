@@ -40,7 +40,10 @@ public class VideoContentProcessor {
         if (thumb != null) {
             video.setThumbnail(FileUtils.readFileToByteArray(thumb));
         }
-        return videoRepository.save(video);
+        video.setContent(null);
+        video.setThumbnail(null);
+        Video savedVideo = videoRepository.save(video);
+        return savedVideo;
     }
 
 }

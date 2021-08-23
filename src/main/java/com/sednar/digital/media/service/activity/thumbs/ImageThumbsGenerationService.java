@@ -66,6 +66,7 @@ public class ImageThumbsGenerationService {
                 image.setThumbnail(FileUtils.readFileToByteArray(thumbnail));
                 log.info("Generated thumbnail for the id={}", id);
                 imageRepository.save(image);
+                image.setThumbnail(null);
                 // Save a copy to the file system
                 fileSystemClient.store(Type.IMAGE, id, file, thumbnail);
                 log.info("Saved thumbnail for the id={}", id);
