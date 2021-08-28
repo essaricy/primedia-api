@@ -18,9 +18,11 @@ public class FileSystemApplication {
 
     private static final String STORAGE_KEY = "STORE";
 
-    private static final String THUMB_KEY = "_THUMB";
+    private static final String DOWNLOAD_KEY = "DOWNLOAD";
 
     private static final String WORK_KEY = "WORK";
+
+    private static final String THUMB_KEY = "_THUMB";
 
     private final FileSystemProps fileSystemProps;
 
@@ -42,27 +44,36 @@ public class FileSystemApplication {
         createDirectory(baseDir, fileSystemProps.getBinDirName());
 
         File storageDir = createDirectory(baseDir, fileSystemProps.getStorageDirName());
-        SUBSYSTEMS_MAP.put(STORAGE_KEY, storageDir);
-        Arrays.stream(Type.values()).forEach( type -> {
-            try {
-                String typeName = type.name();
-                File mediaDir = createDirectory(storageDir, typeName);
-                File thumbDirectory = createDirectory(mediaDir, fileSystemProps.getThumbnailDirName());
-                SUBSYSTEMS_MAP.put(STORAGE_KEY + typeName, mediaDir);
-                SUBSYSTEMS_MAP.put(STORAGE_KEY + typeName + THUMB_KEY, thumbDirectory);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        createSubSystem(storageDir, STORAGE_KEY, true);
 
         File workDirectory = createDirectory(baseDir, fileSystemProps.getWorkDirName());
         SUBSYSTEMS_MAP.put(WORK_KEY, workDirectory);
 
+        File downloadDir = createDirectory(baseDir, fileSystemProps.getDownloadDirName());
+        createSubSystem(downloadDir, DOWNLOAD_KEY, false);
+
         createDirectory(baseDir, fileSystemProps.getLogsDirName());
     }
 
+    private void createSubSystem(File baseDir, String key, boolean createThumbs) {
+        SUBSYSTEMS_MAP.put(key, baseDir);
+        Arrays.stream(Type.values()).forEach(type -> {
+            try {
+                String typeName = type.name();
+                File mediaDir = createDirectory(baseDir, typeName);
+                SUBSYSTEMS_MAP.put(key + typeName, mediaDir);
+                if (createThumbs) {
+                    File thumbDirectory = createDirectory(mediaDir, fileSystemProps.getThumbnailDirName());
+                    SUBSYSTEMS_MAP.put(key + typeName + THUMB_KEY, thumbDirectory);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     private File createDirectory(File baseDir, String dirName) throws IOException {
-        File directory = new File(baseDir, dirName);
+        File directory = new File(baseDir, dirName.toLowerCase());
         FileUtils.forceMkdir(directory);
         return directory;
     }
@@ -73,6 +84,10 @@ public class FileSystemApplication {
 
     public File getStorageDir(Type type) {
         return SUBSYSTEMS_MAP.get(STORAGE_KEY + type.name());
+    }
+
+    public File getDownloadDir(Type type) {
+        return SUBSYSTEMS_MAP.get(DOWNLOAD_KEY + type.name());
     }
 
     public File getThumbnailDir(Type type) {

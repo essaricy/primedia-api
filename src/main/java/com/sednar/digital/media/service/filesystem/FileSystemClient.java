@@ -54,6 +54,13 @@ public class FileSystemClient {
         log.info("Stored thumbnail file: {}", finalThumb.getName());
     }
 
+    public void download(Type type, String id, byte[] srcContent) throws IOException {
+        File downloadDir = fileSystemApplication.getDownloadDir(type);
+        File finalFile = new File(downloadDir, id + (type == Type.VIDEO ? ".mp4" : ".jpg"));
+        FileUtils.writeByteArrayToFile(finalFile, srcContent);
+        log.info("Downloaded media file: {}", finalFile.getName());
+    }
+
     public boolean exists(Type type, String id) {
         File storageDir = fileSystemApplication.getStorageDir(type);
         File contentFile = new File(storageDir, id);
@@ -62,6 +69,12 @@ public class FileSystemClient {
         File thumbFile = new File(thumbDir, id);
 
         return contentFile.exists() && thumbFile.exists();
+    }
+
+    public boolean isDownloaded(Type type, String id) {
+        File storageDir = fileSystemApplication.getDownloadDir(type);
+        File contentFile = new File(storageDir, id);
+        return contentFile.exists();
     }
 
     public Collection<File> list(Type type) {

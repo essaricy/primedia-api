@@ -22,7 +22,7 @@ public interface ActivityProgressRepository extends CrudRepository<ActivityProgr
     }
 
     default void updateOnSuccess(int success, ActivityProgress activityProgress) {
-        activityProgress.setSkipped(success);
+        activityProgress.setSuccess(success);
         save(activityProgress);
     }
 

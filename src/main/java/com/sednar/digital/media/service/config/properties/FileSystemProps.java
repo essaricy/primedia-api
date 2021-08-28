@@ -23,6 +23,8 @@ public class FileSystemProps {
 
     private String workDirName;
 
+    private String downloadDirName;
+
     private String logsDirName;
 
 }

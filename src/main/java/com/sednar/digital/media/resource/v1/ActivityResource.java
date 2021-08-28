@@ -38,18 +38,25 @@ public class ActivityResource {
         return service.generateDurations(strategy);
     }
 
-    @PatchMapping(path = "/{type}/up")
+    @PatchMapping(path = "/{type}/sync/up")
     public ActivityProgressDto syncUp(
             @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type) {
         return service.syncUp(type);
     }
 
-    @PatchMapping(path = "/{type}/down")
+    @PatchMapping(path = "/{type}/sync/down")
     public ActivityProgressDto syncDown(
             @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type) {
         return service.syncDown(type);
+    }
+
+    @PatchMapping(path = "/{type}/replicate")
+    public ActivityProgressDto replicate(
+            @ApiParam(defaultValue = "Image", allowableValues = MediaConstants.TYPES)
+            @PathVariable @NotNull(message="Invalid Media Type") Type type) {
+        return service.replicate(type);
     }
 
 }

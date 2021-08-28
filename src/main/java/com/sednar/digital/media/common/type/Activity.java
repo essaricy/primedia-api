@@ -9,10 +9,11 @@ import java.util.Arrays;
 
 public enum Activity {
 
-    GENERATE_THUMBS("GEN_THUMB"),
-    GENERATE_DURATIONS("GEN_DUR"),
+    GENERATE_THUMBS("GEN_THUMBS"),
+    GENERATE_DURATIONS("GEN_DURATIONS"),
     SYNC_UP("SYNC_UP"),
-    SYNC_DOWN("SYNC_DWN");
+    SYNC_DOWN("SYNC_DOWN"),
+    REPLICATE("REPLICATE");
 
     @Getter
     private String code;
@@ -22,8 +23,8 @@ public enum Activity {
     }
 
     @JsonValue
-    public static String toCode(Activity uploadStatus) {
-        return uploadStatus.getCode();
+    public String toCode() {
+        return this.getCode();
     }
 
     @JsonCreator
@@ -33,7 +34,4 @@ public enum Activity {
                 .findAny().orElse(null);
     }
 
-    public String getCode() {
-        return this.toString();
-    }
 }

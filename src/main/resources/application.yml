@@ -43,4 +43,5 @@ app:
     storageDirName: storage
     thumbnailDirName: thumbnail
     workDirName: work
+    downloadDirName: download
     logsDirName: logs

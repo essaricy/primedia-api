@@ -3,17 +3,18 @@ package com.sednar.digital.media.service;
 import com.sednar.digital.media.common.type.Activity;
 import com.sednar.digital.media.common.type.GenerationStrategy;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.service.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.ActivityProgressRepository;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.entity.ActivityProgress;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.resource.v1.model.ActivityProgressDto;
 import com.sednar.digital.media.service.activity.duration.DurationsGenerationService;
+import com.sednar.digital.media.service.activity.replicate.ReplicationService;
 import com.sednar.digital.media.service.activity.sync.SyncDownService;
 import com.sednar.digital.media.service.activity.sync.SyncUpService;
 import com.sednar.digital.media.service.activity.thumbs.ThumbsGenerationService;
 import com.sednar.digital.media.service.constants.MapperConstant;
+import com.sednar.digital.media.service.filesystem.FileSystemClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class ActivityService {
 
     @Autowired
     private SyncUpService syncUpService;
+
+    @Autowired
+    private ReplicationService replicationService;
 
     @Autowired
     public ActivityService(MediaRepository mediaRepository,
@@ -84,4 +88,11 @@ public class ActivityService {
         return MapperConstant.ACTIVITY_PROGRESS.map(activityProgress);
     }
 
+    public ActivityProgressDto replicate(Type type) {
+        List<Media> mediaList = mediaRepository.findByType(type.getCode());
+        ActivityProgress activityProgress = activityProgressRepository.start(
+                Activity.REPLICATE, mediaList.size());
+        replicationService.replicate(type, mediaList, activityProgress);
+        return MapperConstant.ACTIVITY_PROGRESS.map(activityProgress);
+    }
 }
