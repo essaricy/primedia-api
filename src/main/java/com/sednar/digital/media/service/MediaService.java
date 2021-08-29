@@ -5,7 +5,6 @@ import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.service.filesystem.FileSystemClient;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.UploadProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
@@ -15,6 +14,7 @@ import com.sednar.digital.media.resource.model.MediaRequestDto;
 import com.sednar.digital.media.resource.model.UploadProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.events.UploadEvent;
+import com.sednar.digital.media.service.filesystem.FileSystemClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,12 +55,22 @@ public class MediaService {
     }
 
     public List<MediaDto> search(Type type, String searchText) {
-        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
-        List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
-        return list.stream()
-                .filter(m -> m.getTags().stream().anyMatch(searchText::equalsIgnoreCase)
-                    || StringUtils.containsIgnoreCase(m.getName(), searchText))
+        List<String> acceptableWords = Arrays.asList(searchText.split("\\s+"))
+                .stream()
+                .filter(w -> StringUtils.trim(w).length() >= 3)
                 .collect(Collectors.toList());
+
+        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
+        List<Media> matches = new ArrayList<>();
+        acceptableWords.stream().forEach(word ->
+                matches.addAll(mediaList.stream()
+                        .filter(media -> StringUtils.containsIgnoreCase(media.getTags(), word)
+                                || StringUtils.containsIgnoreCase(media.getName(), word))
+                        .filter(m -> matches.stream()
+                                .noneMatch(match -> match.getId().longValue() == m.getId().longValue()))
+                        .collect(Collectors.toList()))
+        );
+        return MapperConstant.MEDIA.map(matches);
     }
 
     public UploadProgressDto upload(Type type, MediaRequestDto request, MultipartFile multipartFile)
