@@ -17,33 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("/content")
+@RequestMapping("/content/v1")
 @Api(tags = "Content", value = "APIs related to Media content")
-public class ContentResource {
+public class ContentResourceV1 {
 
     public static final String VIDEO_MP4 = "video/mp4";
 
     private final ContentService service;
 
     @Autowired
-    ContentResource(ContentService service) {
+    ContentResourceV1(ContentService service) {
         this.service = service;
     }
-
-    /*@GetMapping(path = "/{type}/{id}",
-            produces={ MediaType.IMAGE_JPEG_VALUE, VIDEO_MP4 })
-    public ResponseEntity<byte[]> getContent(
-            @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
-            @PathVariable @NotNull(message="Invalid Media Type") Type type,
-            @PathVariable long id) {
-        byte[] content = service.getContent(type, id);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", type == Type.IMAGE
-                ? MediaType.IMAGE_JPEG_VALUE
-                : VIDEO_MP4);
-        headers.add("Content-Length", Long.toString(content.length));
-        return new ResponseEntity<>(content, headers, HttpStatus.OK);
-    }*/
 
     @GetMapping(path = "/{type}/{id}/thumb",
             produces={ MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE })
@@ -61,7 +46,7 @@ public class ContentResource {
     }
 
     @GetMapping(path = "/video/{id}", produces={ VIDEO_MP4 })
-    public ResponseEntity<byte[]> getVide(@PathVariable long id) {
+    public ResponseEntity<byte[]> getVideo(@PathVariable long id) {
         byte[] content = service.getContent(Type.VIDEO, id);
         return new ResponseEntity<>(content, HttpStatus.OK);
     }

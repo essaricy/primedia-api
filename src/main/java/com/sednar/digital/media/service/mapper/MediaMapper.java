@@ -4,7 +4,7 @@ import com.sednar.digital.media.common.constants.MediaConstants;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.resource.v1.model.MediaDto;
+import com.sednar.digital.media.resource.model.MediaDto;
 import com.sednar.digital.media.repo.entity.Media;
 import org.mapstruct.Mapper;
 

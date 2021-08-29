@@ -2,7 +2,7 @@ package com.sednar.digital.media.service.mapper;
 
 import com.sednar.digital.media.common.type.UploadStatus;
 import com.sednar.digital.media.repo.entity.UploadProgress;
-import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
+import com.sednar.digital.media.resource.model.UploadProgressDto;
 import org.mapstruct.Mapper;
 
 import java.util.List;

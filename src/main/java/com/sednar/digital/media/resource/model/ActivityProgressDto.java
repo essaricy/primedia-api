@@ -1,4 +1,4 @@
-package com.sednar.digital.media.resource.v1.model;
+package com.sednar.digital.media.resource.model;
 
 import com.sednar.digital.media.common.type.Activity;
 import lombok.Getter;

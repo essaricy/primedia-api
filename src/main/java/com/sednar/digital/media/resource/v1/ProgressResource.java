@@ -2,8 +2,8 @@ package com.sednar.digital.media.resource.v1;
 
 import com.sednar.digital.media.common.constants.MediaConstants;
 import com.sednar.digital.media.common.type.Type;
-import com.sednar.digital.media.resource.v1.model.ActivityProgressDto;
-import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
+import com.sednar.digital.media.resource.model.ActivityProgressDto;
+import com.sednar.digital.media.resource.model.UploadProgressDto;
 import com.sednar.digital.media.service.ActivityProgressService;
 import com.sednar.digital.media.service.UploadProgressService;
 import io.swagger.annotations.Api;

@@ -10,9 +10,9 @@ import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.UploadProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.repo.entity.UploadProgress;
-import com.sednar.digital.media.resource.v1.model.MediaDto;
-import com.sednar.digital.media.resource.v1.model.MediaRequestDto;
-import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
+import com.sednar.digital.media.resource.model.MediaDto;
+import com.sednar.digital.media.resource.model.MediaRequestDto;
+import com.sednar.digital.media.resource.model.UploadProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import com.sednar.digital.media.service.events.UploadEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.ValidationException;
 import java.io.File;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +55,6 @@ public class MediaService {
     }
 
     public List<MediaDto> search(Type type, String searchText) {
-        // TODO: enhance search tokens
         List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
         List<MediaDto> list = MapperConstant.MEDIA.map(mediaList);
         return list.stream()

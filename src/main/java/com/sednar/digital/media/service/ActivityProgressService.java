@@ -2,7 +2,7 @@ package com.sednar.digital.media.service;
 
 import com.sednar.digital.media.repo.ActivityProgressRepository;
 import com.sednar.digital.media.repo.entity.ActivityProgress;
-import com.sednar.digital.media.resource.v1.model.ActivityProgressDto;
+import com.sednar.digital.media.resource.model.ActivityProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

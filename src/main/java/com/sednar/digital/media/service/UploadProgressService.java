@@ -5,7 +5,7 @@ import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.UploadProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
 import com.sednar.digital.media.repo.entity.UploadProgress;
-import com.sednar.digital.media.resource.v1.model.UploadProgressDto;
+import com.sednar.digital.media.resource.model.UploadProgressDto;
 import com.sednar.digital.media.service.constants.MapperConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

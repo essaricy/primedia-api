@@ -7,7 +7,7 @@ import com.sednar.digital.media.repo.ActivityProgressRepository;
 import com.sednar.digital.media.repo.MediaRepository;
 import com.sednar.digital.media.repo.entity.ActivityProgress;
 import com.sednar.digital.media.repo.entity.Media;
-import com.sednar.digital.media.resource.v1.model.ActivityProgressDto;
+import com.sednar.digital.media.resource.model.ActivityProgressDto;
 import com.sednar.digital.media.service.activity.duration.DurationsGenerationService;
 import com.sednar.digital.media.service.activity.replicate.ReplicationService;
 import com.sednar.digital.media.service.activity.sync.SyncDownService;
