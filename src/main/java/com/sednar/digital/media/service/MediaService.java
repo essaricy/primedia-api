@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MediaService {
 
-    public static final int DEFAULT_MAX_RESULTS = 3;
+    public static final int DEFAULT_MAX_RESULTS = 5;
 
     private final MediaRepository mediaRepository;
 
@@ -55,22 +55,28 @@ public class MediaService {
     }
 
     public List<MediaDto> search(Type type, String searchText) {
+        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
+
+        List<Media> matches = new ArrayList<>();
+        // First, match with the whole text provided
+        matches.addAll(getMatches(searchText, mediaList, matches));
+
+        // Then, match with the words provided
         List<String> acceptableWords = Arrays.asList(searchText.split("\\s+"))
                 .stream()
                 .filter(w -> StringUtils.trim(w).length() >= 3)
                 .collect(Collectors.toList());
-
-        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
-        List<Media> matches = new ArrayList<>();
-        acceptableWords.stream().forEach(word ->
-                matches.addAll(mediaList.stream()
-                        .filter(media -> StringUtils.containsIgnoreCase(media.getTags(), word)
-                                || StringUtils.containsIgnoreCase(media.getName(), word))
-                        .filter(m -> matches.stream()
-                                .noneMatch(match -> match.getId().longValue() == m.getId().longValue()))
-                        .collect(Collectors.toList()))
-        );
+        acceptableWords.stream().forEach(word -> matches.addAll(getMatches(word, mediaList, matches)));
         return MapperConstant.MEDIA.map(matches);
+    }
+
+    private List<Media> getMatches(String searchText, List<Media> mediaList, List<Media> matches) {
+        return mediaList.stream()
+                .filter(media -> StringUtils.containsIgnoreCase(media.getTags(), searchText)
+                        || StringUtils.containsIgnoreCase(media.getName(), searchText))
+                .filter(m -> matches.stream()
+                        .noneMatch(match -> match.getId().longValue() == m.getId().longValue()))
+                .collect(Collectors.toList());
     }
 
     public UploadProgressDto upload(Type type, MediaRequestDto request, MultipartFile multipartFile)
@@ -107,7 +113,7 @@ public class MediaService {
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
             File workingFile = fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
             Media savedMedia = mediaRepository.save(media);
-            UploadProgress savedUploadProgress = uploadProgressRepository.initiate(trackingId, savedMedia.getId());
+            UploadProgress savedUploadProgress = uploadProgressRepository.start(trackingId, savedMedia.getId());
             applicationEventPublisher.publishEvent(
                     new UploadEvent(this, savedMedia, savedUploadProgress, workingFile));
             return MapperConstant.UPLOAD_PROGRESS.map(savedUploadProgress);

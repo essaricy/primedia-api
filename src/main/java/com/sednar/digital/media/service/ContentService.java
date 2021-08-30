@@ -32,13 +32,13 @@ public class ContentService {
     }
 
     public byte[] getThumbnail(Type type, long id) {
+        ThumbnailColumn column = null;
         if (type == Type.VIDEO) {
-            ThumbnailColumn column = videoRepository.getById(id);
-            return column == null ? null : column.getThumbnail();
+            column = videoRepository.getById(id);
         } else if (type == Type.IMAGE) {
-            return getContent(type, id);
+            column = imageRepository.getById(id);
         }
-        return null;
+        return column == null ? null : column.getThumbnail();
     }
 
     public byte[] getContent(Type type, long id) {
