@@ -55,19 +55,23 @@ public class MediaService {
     }
 
     public List<MediaDto> search(Type type, String searchText) {
-        List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
+        if (StringUtils.isBlank(searchText)) {
+            List<Media> mediaList = mediaRepository.findAllByTypeOrderByUploadDateDesc(type.getCode());
+            return MapperConstant.MEDIA.map(mediaList);
+        } else {
+            List<Media> mediaList = mediaRepository.findByTypeOrderByViewsDescLikesDesc(type.getCode());
+            List<Media> matches = new ArrayList<>();
+            // First, match with the whole text provided
+            matches.addAll(getMatches(searchText, mediaList, matches));
 
-        List<Media> matches = new ArrayList<>();
-        // First, match with the whole text provided
-        matches.addAll(getMatches(searchText, mediaList, matches));
-
-        // Then, match with the words provided
-        List<String> acceptableWords = Arrays.asList(searchText.split("\\s+"))
-                .stream()
-                .filter(w -> StringUtils.trim(w).length() >= 3)
-                .collect(Collectors.toList());
-        acceptableWords.stream().forEach(word -> matches.addAll(getMatches(word, mediaList, matches)));
-        return MapperConstant.MEDIA.map(matches);
+            // Then, match with the words provided
+            List<String> acceptableWords = Arrays.asList(searchText.split("\\s+"))
+                    .stream()
+                    .filter(w -> StringUtils.trim(w).length() >= 3)
+                    .collect(Collectors.toList());
+            acceptableWords.stream().forEach(word -> matches.addAll(getMatches(word, mediaList, matches)));
+            return MapperConstant.MEDIA.map(matches);
+        }
     }
 
     private List<Media> getMatches(String searchText, List<Media> mediaList, List<Media> matches) {

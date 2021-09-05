@@ -41,6 +41,7 @@ public interface UploadProgressRepository extends CrudRepository<UploadProgress,
 
     @CachePut(cacheNames=CACHE_NAME, key="#uploadProgress.id")
     default UploadProgress end(UploadProgress uploadProgress) {
+        uploadProgress.setStatus(UploadStatus.ALL_DONE.getCode());
         uploadProgress.setEndTime(new Timestamp(System.currentTimeMillis()));
         return save(uploadProgress);
     }

@@ -37,7 +37,7 @@ public class MediaResource {
     public List<MediaDto> search(
             @ApiParam(defaultValue = "Video", allowableValues = MediaConstants.TYPES)
             @PathVariable @NotNull(message="Invalid Media Type") Type type,
-            @RequestParam(name="s") String searchText) {
+            @RequestParam(name="s", required = false) String searchText) {
         return service.search(type, searchText);
     }
 
