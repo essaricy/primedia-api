@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
                 .timestamp(new Date())
                 .url(req.getDescription(false))
                 .build();
-        return new ResponseEntity<ErrorDto>(errorDto, status);
+        return new ResponseEntity<>(errorDto, status);
     }
 
 }

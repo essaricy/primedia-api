@@ -1,5 +1,5 @@
 server:
-  port: 9211
+  port: 9200
 
 spring:
   data:
@@ -7,7 +7,6 @@ spring:
       detection-strategy: annotated
   datasource:
     url: jdbc:postgresql://localhost:5432/foradz
-#    url: jdbc:postgresql://localhost:5432/myvid
     username: java_webservice_user
     password: MXEPqkpBEBSfD8RrjZchxDj7FwRy9qc8
   jpa:

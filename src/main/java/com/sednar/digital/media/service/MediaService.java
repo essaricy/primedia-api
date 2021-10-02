@@ -5,10 +5,9 @@ import com.sednar.digital.media.common.exception.MediaException;
 import com.sednar.digital.media.common.type.Quality;
 import com.sednar.digital.media.common.type.Rating;
 import com.sednar.digital.media.common.type.Type;
+import com.sednar.digital.media.common.type.UploadStatus;
 import com.sednar.digital.media.repo.MediaRepository;
-import com.sednar.digital.media.repo.UploadProgressRepository;
 import com.sednar.digital.media.repo.entity.Media;
-import com.sednar.digital.media.repo.entity.UploadProgress;
 import com.sednar.digital.media.resource.model.MediaDto;
 import com.sednar.digital.media.resource.model.MediaRequestDto;
 import com.sednar.digital.media.resource.model.UploadProgressDto;
@@ -37,19 +36,15 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
 
-    private final UploadProgressRepository uploadProgressRepository;
-
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final FileSystemClient fileSystemClient;
 
     @Autowired
     public MediaService(MediaRepository mediaRepository,
-                        UploadProgressRepository uploadProgressRepository,
                         FileSystemClient fileSystemClient,
                         ApplicationEventPublisher applicationEventPublisher) {
         this.mediaRepository = mediaRepository;
-        this.uploadProgressRepository = uploadProgressRepository;
         this.fileSystemClient = fileSystemClient;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -65,8 +60,7 @@ public class MediaService {
             matches.addAll(getMatches(searchText, mediaList, matches));
 
             // Then, match with the words provided
-            List<String> acceptableWords = Arrays.asList(searchText.split("\\s+"))
-                    .stream()
+            List<String> acceptableWords = Arrays.stream(searchText.split("\\s+"))
                     .filter(w -> StringUtils.trim(w).length() >= 3)
                     .collect(Collectors.toList());
             acceptableWords.stream().forEach(word -> matches.addAll(getMatches(word, mediaList, matches)));
@@ -116,11 +110,11 @@ public class MediaService {
             String trackingId = UUID.randomUUID().toString();
             log.info("Assigned tracking trackingId={}, type={}, name={}, size={}", trackingId, type, name, size);
             File workingFile = fileSystemClient.createWorkingFile(trackingId, multipartFile.getBytes());
-            Media savedMedia = mediaRepository.save(media);
-            UploadProgress savedUploadProgress = uploadProgressRepository.start(trackingId, savedMedia.getId());
+            Long mediaId = mediaRepository.save(media).getId();
+
             applicationEventPublisher.publishEvent(
-                    new UploadEvent(this, savedMedia, savedUploadProgress, workingFile));
-            return MapperConstant.UPLOAD_PROGRESS.map(savedUploadProgress);
+                    new UploadEvent(this, trackingId, mediaId, workingFile));
+            return initUploadProgress(trackingId, mediaId);
         } catch(Exception e) {
             throw new MediaException("Unable to store " + type + ". ERROR=" + e.getMessage());
         }
@@ -183,6 +177,15 @@ public class MediaService {
                 .stream()
                 .limit(Optional.ofNullable(max).orElse(DEFAULT_MAX_RESULTS))
                 .collect(Collectors.toList());
+    }
+
+    private UploadProgressDto initUploadProgress(String trackingId, long mediaId) {
+        UploadProgressDto uploadProgress = new UploadProgressDto();
+        uploadProgress.setId(trackingId);
+        uploadProgress.setMediaId(mediaId);
+        uploadProgress.setStartTime(new Timestamp(System.currentTimeMillis()));
+        uploadProgress.setStatus(UploadStatus.INIT);
+        return uploadProgress;
     }
 
 }
